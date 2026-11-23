@@ -2,7 +2,7 @@ name: Instaladores
 
 # Gera o .exe (Windows) e o .dmg (macOS).
 # - Manualmente (Actions → Instaladores → Run workflow): ficheiros ficam como artefactos da execução.
-# - Em PRs que mudem a configuração dos instaladores: artefactos da execução.
+# - Em PRs que mudem a configuração dos instaladores ou a versão da app: artefactos da execução.
 # - Ao enviar uma tag vX.Y.Z: também cria a Release no GitHub com os instaladores.
 on:
   workflow_dispatch:
@@ -13,6 +13,7 @@ on:
     paths:
       - .github/workflows/release.yml
       - apps/desktop/electron-builder.yml
+      - apps/desktop/package.json
 
 permissions:
   contents: read
