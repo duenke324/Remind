@@ -2,7 +2,7 @@
 
 App de desktop (Windows e macOS) para escrever e organizar tudo em páginas feitas de blocos: notas, documentos, tarefas e bases de dados, com contas na cloud e sincronização.
 
-> Estado: em desenvolvimento (Fase 0 — provas de risco). Ver [`plans/PLANO.md`](plans/PLANO.md).
+> Estado: v0.1.0 — contas com verificação em dois passos por email, editor de blocos, sincronização offline. Ver [`plans/PLANO.md`](plans/PLANO.md).
 
 ## Estrutura
 
@@ -21,4 +21,12 @@ npm test             # corre os testes
 npm run lint         # verifica tipos
 ```
 
-Os instaladores (.exe e .dmg) são gerados pelo GitHub Actions e publicados nas Releases.
+## Publicar uma versão
+
+1. Sobe a versão em `apps/desktop/package.json` (ex.: `0.2.0`) e junta ao `main`.
+2. No GitHub: **Releases → Draft a new release**, cria a tag `v0.2.0` a partir do `main` e carrega em **Publish release**.
+3. O workflow **Instaladores** gera o `.exe` (Windows) e os `.dmg` (Mac Apple Silicon e Intel) e anexa-os à Release (~3 min).
+
+Para gerar instaladores sem criar Release: **Actions → Instaladores → Run workflow** (ficam em "Artifacts").
+
+> Os instaladores ainda não são assinados: o Windows mostra um aviso do SmartScreen ("Mais informações → Executar mesmo assim") e, no Mac, é preciso abrir em **Definições → Privacidade e segurança → Abrir mesmo assim**.
