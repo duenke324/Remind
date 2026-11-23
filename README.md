@@ -27,6 +27,12 @@ npm run lint         # verifica tipos
 2. No GitHub: **Releases → Draft a new release**, cria a tag `v0.2.0` a partir do `main` e carrega em **Publish release**.
 3. O workflow **Instaladores** gera o `.exe` (Windows) e os `.dmg` (Mac Apple Silicon e Intel) e anexa-os à Release (~3 min).
 
+### Servidor de contas dentro dos instaladores
+
+A app instalada liga-se ao endereço da variável do repositório **`REMIND_SERVER_URL`**
+(Settings → Secrets and variables → Actions → separador *Variables*), por exemplo `https://remind-server.vercel.app`.
+Sem ela, a app aponta para o servidor local de desenvolvimento e avisa que não tem servidor configurado.
+
 ### Downloads públicos (botões do site)
 
 O código é privado; os instaladores ficam no repositório **público** `duenke324/remind-downloads`, para onde
