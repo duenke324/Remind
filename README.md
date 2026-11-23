@@ -29,9 +29,8 @@ npm run lint         # verifica tipos
 
 ### Servidor de contas dentro dos instaladores
 
-A app instalada liga-se ao endereço da variável do repositório **`REMIND_SERVER_URL`**
-(Settings → Secrets and variables → Actions → separador *Variables*), por exemplo `https://remind-server.vercel.app`.
-Sem ela, a app aponta para o servidor local de desenvolvimento e avisa que não tem servidor configurado.
+Os instaladores ligam-se ao endereço em `apps/desktop/.env.production` (`MAIN_VITE_SERVER_URL`), hoje
+`https://remind-server.vercel.app`. Em desenvolvimento (`npm run dev`) a app usa o servidor local.
 
 ### Downloads públicos (botões do site)
 

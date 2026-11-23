@@ -1,8 +1,7 @@
 import type pg from 'pg'
 
 /** Tabela das páginas. Os ids vêm da app (criados offline), por isso são texto. */
-export async function migratePages(pool: pg.Pool): Promise<void> {
-  await pool.query(`
+export const PAGES_SQL = `
     create sequence if not exists page_seq;
     create table if not exists page (
       id          text primary key,
@@ -23,5 +22,8 @@ export async function migratePages(pool: pg.Pool): Promise<void> {
     );
     create index if not exists page_user_seq_idx on page (user_id, seq);
     create index if not exists page_parent_idx on page (parent_id);
-  `)
+`
+
+export async function migratePages(pool: pg.Pool): Promise<void> {
+  await pool.query(PAGES_SQL)
 }

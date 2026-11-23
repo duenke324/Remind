@@ -5,7 +5,8 @@ import type { SocialProvider } from '../shared/types'
 import { AuthClient } from './auth-client'
 
 // Endereço do servidor: variável de ambiente (testes) > valor da build > servidor local.
-const SERVER_URL = (process.env.REMIND_SERVER_URL ?? import.meta.env.MAIN_VITE_SERVER_URL ?? 'http://localhost:8787').replace(/\/+$/, '')
+// `||` e não `??`: um valor vazio (variável definida mas sem conteúdo) não pode ganhar ao seguinte.
+const SERVER_URL = (process.env.REMIND_SERVER_URL || import.meta.env.MAIN_VITE_SERVER_URL || 'http://localhost:8787').replace(/\/+$/, '')
 
 // Permite correr várias instâncias isoladas (testes E2E) sem partilharem dados.
 if (process.env.REMIND_USER_DATA) app.setPath('userData', process.env.REMIND_USER_DATA)
