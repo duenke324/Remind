@@ -18,6 +18,11 @@ on:
 permissions:
   contents: read
 
+# Um novo envio cancela a geração anterior do mesmo ramo (as máquinas macOS gastam 10x mais minutos).
+concurrency:
+  group: instaladores-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   build:
     strategy:
