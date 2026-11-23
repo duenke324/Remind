@@ -30,7 +30,19 @@ await build({
 
 writeFileSync(
   join(fn, '.vc-config.json'),
-  JSON.stringify({ runtime: 'nodejs22.x', handler: 'index.mjs', launcherType: 'Nodejs', shouldAddHelpers: false, maxDuration: 30 }, null, 2)
+  JSON.stringify(
+    {
+      runtime: 'nodejs22.x',
+      handler: 'index.mjs',
+      launcherType: 'Nodejs',
+      shouldAddHelpers: false,
+      maxDuration: 30,
+      // Dublin: ao lado da base de dados (Supabase eu-west-1, Irlanda).
+      regions: ['dub1']
+    },
+    null,
+    2
+  )
 )
 
 const securityHeaders = {
