@@ -7,12 +7,15 @@
     "dev": "tsx src/dev.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "migrate": "tsx src/migrate.ts"
+    "migrate": "tsx src/migrate.ts",
+    "build": "node scripts/build-vercel.mjs",
+    "schema:sql": "tsx src/schema-sql.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.6",
     "@types/nodemailer": "8.0.2",
     "@types/pg": "8.23.1",
+    "esbuild": "0.28.2",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vitest": "5.1.0"
