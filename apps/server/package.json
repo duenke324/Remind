@@ -1,0 +1,27 @@
+{
+  "name": "@remind/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/dev.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "migrate": "tsx src/migrate.ts"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "@types/nodemailer": "8.0.2",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0"
+  },
+  "dependencies": {
+    "@hono/node-server": "2.1.6",
+    "better-auth": "1.7.18",
+    "hono": "4.13.17",
+    "nodemailer": "10.4.0",
+    "pg": "8.23.1"
+  }
+}
