@@ -32,9 +32,13 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Garantir o Electron instalado (antes de qualquer teste o arrancar)
+        run: node node_modules/electron/install.js && test -x node_modules/electron/dist/electron
+      - name: Browser para os testes do site
+        run: npx playwright install --with-deps chromium
       - name: Verificar tipos
         run: npm run lint
       - name: Testes (unitários e integração do servidor)
         run: npm test
-      - name: Testes E2E (app Electron)
+      - name: Testes E2E (app Electron e site)
         run: xvfb-run -a npm run test:e2e
