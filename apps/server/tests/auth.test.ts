@@ -1,78 +1,16 @@
 import { randomUUID } from 'node:crypto'
-import pg from 'pg'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { createApp } from '../src/app'
-import { createAuth, migrate } from '../src/auth'
-import { createMemoryMailer } from '../src/mailer'
+import { createHarness } from './helpers/harness'
 
-const DATABASE_URL = process.env.TEST_DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/remind_test'
-const BASE_URL = 'http://localhost:8787'
-
-const pool = new pg.Pool({ connectionString: DATABASE_URL })
-const mailer = createMemoryMailer()
-const auth = createAuth({
-  pool,
-  mailer,
-  baseURL: BASE_URL,
-  secret: 'segredo-de-teste-com-mais-de-32-caracteres!!',
-  rateLimit: false
-})
-const app = createApp(auth)
-
-/** Cliente HTTP mínimo com cookies, como um browser. */
-function client() {
-  const jar = new Map<string, string>()
-  return async (path: string, init: { method?: string; body?: unknown } = {}) => {
-    const headers = new Headers({ origin: BASE_URL })
-    if (init.body !== undefined) headers.set('content-type', 'application/json')
-    if (jar.size) headers.set('cookie', [...jar].map(([k, v]) => `${k}=${v}`).join('; '))
-    const res = await app.request(`${BASE_URL}${path}`, {
-      method: init.method ?? (init.body === undefined ? 'GET' : 'POST'),
-      headers,
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
-      redirect: 'manual'
-    })
-    for (const c of res.headers.getSetCookie()) {
-      const [pair] = c.split(';')
-      const [name, ...rest] = (pair ?? '').split('=')
-      const value = rest.join('=')
-      if (!name) continue
-      if (value === '' || /max-age=0/i.test(c)) jar.delete(name)
-      else jar.set(name, value)
-    }
-    const text = await res.text()
-    let json: unknown = null
-    try {
-      json = JSON.parse(text)
-    } catch {
-      /* resposta sem JSON */
-    }
-    return { status: res.status, json: json as Record<string, any>, headers: res.headers }
-  }
-}
-
-function lastMailTo(email: string) {
-  const mail = mailer.sent.filter((m) => m.to === email).at(-1)
-  if (!mail) throw new Error(`Nenhum email enviado para ${email}`)
-  return mail
-}
-
-async function createVerifiedUser(email: string, password: string) {
-  const http = client()
-  const signUp = await http('/api/auth/sign-up/email', { body: { email, password, name: 'Teste' } })
-  expect(signUp.status).toBe(200)
-  const link = lastMailTo(email).text.match(/https?:\/\/\S+/)?.[0]
-  expect(link).toBeTruthy()
-  const verify = await http(new URL(link!).pathname + new URL(link!).search)
-  expect([200, 302]).toContain(verify.status)
-}
+const h = createHarness()
+const { mailer, client, lastMailTo, createVerifiedUser } = h
 
 beforeAll(async () => {
-  await migrate(auth)
+  await h.setup()
 })
 
 afterAll(async () => {
-  await pool.end()
+  await h.pool.end()
 })
 
 beforeEach(() => {

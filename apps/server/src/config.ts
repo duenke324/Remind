@@ -28,14 +28,15 @@ function mailerFromEnv(env: NodeJS.ProcessEnv): Mailer {
   })
 }
 
-export function authFromEnv(env: NodeJS.ProcessEnv = process.env) {
+export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
+  const pool = new pg.Pool({ connectionString: required(env, 'DATABASE_URL'), max: 3 })
   const config: AuthConfig = {
-    pool: new pg.Pool({ connectionString: required(env, 'DATABASE_URL'), max: 3 }),
+    pool,
     mailer: mailerFromEnv(env),
     baseURL: required(env, 'BETTER_AUTH_URL'),
     secret: required(env, 'BETTER_AUTH_SECRET'),
     google: oauth(env, 'GOOGLE'),
     github: oauth(env, 'GITHUB')
   }
-  return createAuth(config)
+  return { auth: createAuth(config), pool, baseURL: config.baseURL }
 }

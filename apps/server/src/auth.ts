@@ -39,6 +39,7 @@ export function createAuth(config: AuthConfig) {
     },
     emailVerification: {
       sendOnSignUp: true,
+      sendOnSignIn: true,
       sendVerificationEmail: async ({ user, url }) => mailer.send(verificationEmail(user.email, url))
     },
     socialProviders: {
