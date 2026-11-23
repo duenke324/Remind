@@ -3,7 +3,7 @@ import './styles.css'
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /** Onde estão os instaladores (nomes fixos em todas as versões). */
-const DOWNLOAD_BASE = (import.meta.env.VITE_DOWNLOAD_BASE ?? 'https://github.com/duenke324/remind/releases/latest/download').replace(/\/+$/, '')
+const DOWNLOAD_BASE = (import.meta.env.VITE_DOWNLOAD_BASE ?? 'https://github.com/duenke324/remind-downloads/releases/latest/download').replace(/\/+$/, '')
 const FILES = {
   windows: 'Remind-Setup.exe',
   'mac-arm': 'Remind-arm64.dmg',

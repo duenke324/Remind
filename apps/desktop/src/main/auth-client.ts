@@ -21,7 +21,9 @@ export class AuthClient {
 
   constructor(
     readonly serverUrl: string,
-    private readonly openExternal: (url: string) => Promise<void>
+    private readonly openExternal: (url: string) => Promise<void>,
+    /** App instalada (não em desenvolvimento). */
+    private readonly packaged = false
   ) {}
 
   private async http(path: string, init: { method?: string; body?: unknown; bearer?: boolean } = {}): Promise<HttpResult> {
@@ -63,7 +65,9 @@ export class AuthClient {
     try {
       return await run()
     } catch {
-      return { ok: false, code: 'NETWORK' }
+      // Uma app instalada a apontar para o servidor local foi gerada sem endereço de servidor.
+      const unconfigured = this.packaged && /\/\/(localhost|127\.0\.0\.1)[:/]/.test(`${this.serverUrl}/`)
+      return { ok: false, code: unconfigured ? 'NO_SERVER' : 'NETWORK' }
     }
   }
 

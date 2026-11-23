@@ -151,7 +151,7 @@ function registerIpc(): void {
 }
 
 void app.whenReady().then(() => {
-  auth = new AuthClient(SERVER_URL, (url) => shell.openExternal(url))
+  auth = new AuthClient(SERVER_URL, (url) => shell.openExternal(url), app.isPackaged)
   registerIpc()
   deliverLink(findDeepLinkInArgv(process.argv))
   createWindow()

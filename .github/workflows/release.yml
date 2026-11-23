@@ -5,8 +5,16 @@ name: Instaladores
 # - Em PRs que mudem a configuração dos instaladores ou a versão da app: artefactos da execução.
 # - Ao publicar uma Release no GitHub (Releases → Draft a new release → tag vX.Y.Z → Publish):
 #   gera os instaladores e anexa-os a essa Release.
+# - Downloads públicos: se o segredo DOWNLOADS_TOKEN existir, os instaladores são também publicados
+#   no repositório público de downloads (é para lá que apontam os botões do site).
+#   Para publicar a versão atual sem criar Release: Run workflow → "Publicar nos downloads públicos".
 on:
   workflow_dispatch:
+    inputs:
+      publicar:
+        description: Publicar nos downloads públicos
+        type: boolean
+        default: false
   release:
     types: [published]
   # Em PRs, só quando a configuração dos instaladores muda (as máquinas macOS gastam 10x mais minutos).
@@ -48,6 +56,8 @@ jobs:
         run: npm run ${{ matrix.script }} -w @remind/desktop
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          # Endereço do servidor de contas dentro da app (variável do repositório REMIND_SERVER_URL).
+          MAIN_VITE_SERVER_URL: ${{ vars.REMIND_SERVER_URL }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: instalador-${{ matrix.os }}
@@ -70,3 +80,36 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name }}
         run: gh release upload "$TAG" instaladores/* --repo "$GITHUB_REPOSITORY" --clobber
+
+  # Repositório público só com os instaladores: o código continua privado.
+  public:
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publicar)
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      PUBLIC_REPO: duenke324/remind-downloads
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: apps/desktop/package.json
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: instaladores
+          merge-multiple: true
+      - name: Publicar nos downloads públicos
+        env:
+          GH_TOKEN: ${{ secrets.DOWNLOADS_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::Sem o segredo DOWNLOADS_TOKEN: downloads públicos não publicados (ver README)."
+            exit 0
+          fi
+          TAG="${RELEASE_TAG:-v$(node -p "require('./apps/desktop/package.json').version")}"
+          if ! gh release view "$TAG" --repo "$PUBLIC_REPO" >/dev/null 2>&1; then
+            gh release create "$TAG" --repo "$PUBLIC_REPO" --title "Remind $TAG" --notes "Instaladores do Remind $TAG para Windows e macOS."
+          fi
+          gh release upload "$TAG" instaladores/* --repo "$PUBLIC_REPO" --clobber
+          # Garante que esta versão é a "latest" (para onde apontam os botões do site).
+          gh release edit "$TAG" --repo "$PUBLIC_REPO" --latest
