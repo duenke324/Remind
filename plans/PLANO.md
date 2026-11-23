@@ -1,6 +1,6 @@
 # Plano — Remind: app tipo Notion para desktop
 
-Estado: **aprovado a 23/11/2026 — Fase 0 em curso**.
+Estado: **aprovado a 23/11/2026 — v0.1.0 com as Fases 0–2 feitas; falta ligar os serviços reais (Supabase, Vercel, Gmail, OAuth)**.
 
 Nota sobre o REA: o utilizador decidiu usá-lo. Corre no PC dele (Windows, onde está o Notion), não neste servidor, e serve só para observar como a app funciona. Ver a tabela de Decisões.
 
@@ -88,12 +88,40 @@ Feito: criei no teu Notion uma página "Remind — Projeto" com: visão, esta cr
 | Envio de email | Gmail SMTP com password de app | Sem domínio próprio; limite ~500/dia, serve para beta. Trocar para Resend quando houver domínio |
 | Âmbito | Fases 0–2 primeiro, paragem para o utilizador testar, depois Fase 3+ | Menos risco; .exe/.dmg usáveis cedo |
 
+## Execução (23/11/2026)
+
+### Arquitetura que ficou
+- `apps/server`: Hono + Better Auth + Postgres. Rotas: `/api/auth/*`, `/api/pages` (sincronização por cursor `seq`),
+  `/api/config`, páginas web sem JS (`/auth/verified`, `/auth/reset-password`, `/desktop/oauth/*`).
+- `apps/desktop`: Electron. O processo principal fala com o servidor e guarda o token cifrado (safeStorage);
+  o ecrã (React) guarda as páginas em IndexedDB (Dexie) e sincroniza pelo processo principal.
+- Login Google/GitHub: a app abre o browser em `/desktop/oauth/<fornecedor>?state=…`; no fim o servidor devolve
+  `remind://auth/callback?token=<uso único>&state=…`; a app confirma o `state` e troca o token por uma sessão.
+
+### Bugs encontrados pelos testes (e corrigidos)
+- Links `remind://` com `../` eram normalizados em silêncio e aceites.
+- O servidor local falhava sem `.env`.
+- Edição contínua adiava a sincronização indefinidamente e o indicador dizia "Sincronizado" com alterações por enviar.
+- O ecrã da página era reaproveitado entre páginas: um título a meio podia ser gravado na página errada.
+- 429 (demasiadas tentativas) aparecia como "Algo correu mal".
+
+### Limitações conhecidas
+- Conflitos: o último a gravar ganha (por página). Edição simultânea em tempo real fica para a Fase 4 (Yjs).
+- O menu "/" do editor usa as traduções da biblioteca em português do Brasil.
+- Imagens ficam dentro da página (máx. 2 MB cada); armazenamento de ficheiros a sério vem depois.
+- Instaladores sem assinatura (aviso no Windows; no macOS é preciso autorizar nas Definições).
+- Ícone da app ainda é o do Electron.
+
+### Verificação
+- 25 testes de integração do servidor, 24 unitários da app, E2E do percurso completo (servidor real + dois computadores).
+- Testes "sabotados" de propósito (2FA desligado, limite de tentativas, dono da página) para confirmar que apanham falhas.
+
 ## Progresso
 | Fase | Estado |
 | --- | --- |
-| 0 Provas de risco | em curso |
-| 1 Contas | por começar |
-| 2 Editor | por começar |
+| 0 Provas de risco | feito localmente e na CI; falta provar Vercel, Gmail e OAuth reais (dependem das contas do utilizador) |
+| 1 Contas | feito (v0.1.0): registo, confirmação de email, OTP por email obrigatório, recuperar palavra-passe, Google/GitHub pelo browser |
+| 2 Editor | feito (v0.1.0): árvore de páginas, arrastar, favoritos, lixo, editor de blocos, ícone/capa, pesquisa, tema, PT/EN, offline + sincronização |
 | 3 Bases de dados | por começar |
 | 4 Colaboração | por começar |
 | 5 Extras | por começar |

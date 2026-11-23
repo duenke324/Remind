@@ -1,0 +1,38 @@
+appId: io.github.duenke324.remind
+productName: Remind
+executableName: Remind
+copyright: Copyright © 2026 Remind
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+protocols:
+  - name: Remind
+    schemes:
+      - remind
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: Remind-Setup-${version}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: Remind
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  category: public.app-category.productivity
+  # Sem certificado Apple por agora: a app não é assinada nem notarizada.
+  identity: null
+  artifactName: Remind-${version}-${arch}.${ext}
+dmg:
+  title: Remind ${version}
+linux:
+  target: dir
+  executableName: remind

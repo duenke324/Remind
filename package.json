@@ -1,0 +1,17 @@
+{
+  "name": "remind",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @remind/desktop",
+    "build": "npm run build -w @remind/desktop",
+    "lint": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
