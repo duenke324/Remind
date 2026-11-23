@@ -36,7 +36,9 @@ export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
     baseURL: required(env, 'BETTER_AUTH_URL'),
     secret: required(env, 'BETTER_AUTH_SECRET'),
     google: oauth(env, 'GOOGLE'),
-    github: oauth(env, 'GITHUB')
+    github: oauth(env, 'GITHUB'),
+    // Só para testes automáticos locais; em produção o limite está sempre ligado.
+    rateLimit: env.NODE_ENV === 'production' || env.REMIND_RATE_LIMIT !== 'off'
   }
   return { auth: createAuth(config), pool, baseURL: config.baseURL }
 }

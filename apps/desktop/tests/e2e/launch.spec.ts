@@ -1,19 +1,22 @@
-import { resolve } from 'node:path'
-import { _electron as electron, expect, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { cleanup, launchApp } from './helpers'
 
-test('a app abre e mostra o título e a versão', async () => {
-  const app = await electron.launch({
-    // Arranca pela pasta da app (lê o package.json), como no instalador.
-    args: [resolve(__dirname, '../..'), '--no-sandbox']
-  })
+test('sem sessão, a app abre no ecrã de entrar e o ecrã não tem acesso ao Node', async () => {
+  // Servidor inexistente: a app tem de abrir na mesma, sem botões de Google/GitHub.
+  const { window, close, userData } = await launchApp('http://localhost:9')
   try {
-    const window = await app.firstWindow()
-    await expect(window.getByTestId('app-title')).toHaveText('Remind')
-    await expect(window.getByTestId('app-version')).toContainText('v0.0.1')
-
-    // Defesa: o renderer não tem acesso ao Node.
+    await expect(window.getByRole('heading', { name: 'Entrar no Remind' })).toBeVisible()
+    await expect(window.getByText('Continuar com Google')).toHaveCount(0)
+    await expect(window.getByTestId('app-version')).toHaveText(/v0\.\d+\.\d+/)
     expect(await window.evaluate(() => typeof (globalThis as { require?: unknown }).require)).toBe('undefined')
+
+    // Sem servidor, o erro é claro.
+    await window.getByLabel('Email').fill('alguem@exemplo.pt')
+    await window.getByLabel('Palavra-passe').fill('qualquer-coisa')
+    await window.getByRole('button', { name: 'Entrar', exact: true }).click()
+    await expect(window.getByRole('alert')).toContainText('Não foi possível ligar ao servidor')
   } finally {
-    await app.close()
+    await close()
+    cleanup(userData)
   }
 })

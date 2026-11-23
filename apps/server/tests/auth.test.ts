@@ -95,6 +95,11 @@ describe('verificação em dois passos por email (OTP)', () => {
 })
 
 describe('servidor', () => {
+  it('diz à app que logins sociais estão disponíveis (nenhum sem credenciais)', async () => {
+    const res = await client()('/api/config')
+    expect(res.json).toEqual({ providers: [] })
+  })
+
   it('responde ao health check', async () => {
     const res = await client()('/health')
     expect(res.status).toBe(200)

@@ -39,6 +39,25 @@ describe('API de páginas', () => {
     expect(updated.json.page.content[0].content[0].text).toBe('Olá mundo')
   })
 
+  it('aceita a página completa várias vezes, como a app a envia', async () => {
+    const pageId = id()
+    const full = (title: string) => ({
+      parentId: null,
+      title,
+      icon: null,
+      cover: null,
+      sort: 1,
+      favorite: false,
+      trashed: false,
+      content: blocks(title)
+    })
+    const first = await alice(`/api/pages/${pageId}`, { method: 'PUT', body: full('Primeira') })
+    expect(first.status).toBe(200)
+    const second = await alice(`/api/pages/${pageId}`, { method: 'PUT', body: full('Segunda') })
+    expect(second.status, second.text).toBe(200)
+    expect(second.json.page).toMatchObject({ title: 'Segunda', version: 2, trashedAt: null })
+  })
+
   it('devolve só as alterações desde a última sincronização', async () => {
     const before = (await alice('/api/pages')).json.cursor as string
     const pageId = id()
