@@ -5,7 +5,14 @@ import { fromEnv } from './config'
 
 let app: ReturnType<typeof createApp> | null = null
 
-// Criada no primeiro pedido: um erro de configuração aparece nos registos e como 500, em vez de impedir o arranque.
-const getApp = () => (app ??= createApp(fromEnv()))
-
-export default getRequestListener((request) => getApp().fetch(request))
+export default getRequestListener((request) => {
+  try {
+    app ??= createApp(fromEnv())
+  } catch (error) {
+    // Configuração incompleta (ex.: variável em falta): diz qual, sem revelar valores.
+    console.error(error)
+    const message = error instanceof Error ? error.message : 'configuração inválida'
+    return Response.json({ ok: false, error: message }, { status: 503 })
+  }
+  return app.fetch(request)
+})
