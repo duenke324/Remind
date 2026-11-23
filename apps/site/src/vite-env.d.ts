@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** Pasta dos instaladores (ex.: https://github.com/<dono>/<repo>/releases/latest/download). */
+  /** Pasta dos instaladores (por omissão, o repositório público de downloads). */
   readonly VITE_DOWNLOAD_BASE?: string
 }
