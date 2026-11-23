@@ -16,7 +16,8 @@ win:
   target:
     - target: nsis
       arch: [x64]
-  artifactName: Remind-Setup-${version}.${ext}
+  # Nome fixo: o site aponta sempre para releases/latest/download/<nome>.
+  artifactName: Remind-Setup.${ext}
 nsis:
   oneClick: false
   perMachine: false
@@ -30,7 +31,7 @@ mac:
   category: public.app-category.productivity
   # Sem certificado Apple por agora: a app não é assinada nem notarizada.
   identity: null
-  artifactName: Remind-${version}-${arch}.${ext}
+  artifactName: Remind-${arch}.${ext}
 dmg:
   title: Remind ${version}
 linux:
