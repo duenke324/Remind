@@ -19,13 +19,19 @@ function mailerFromEnv(env: NodeJS.ProcessEnv): Mailer {
     if (env.NODE_ENV === 'production') throw new Error('SMTP_HOST em falta: sem email não há códigos OTP')
     return createMemoryMailer({ log: true })
   }
-  return createSmtpMailer({
-    host: env.SMTP_HOST,
-    port: Number(env.SMTP_PORT ?? 465),
-    user: required(env, 'SMTP_USER'),
-    pass: required(env, 'SMTP_PASS'),
-    from: env.SMTP_FROM ?? `Remind <${required(env, 'SMTP_USER')}>`
-  })
+  return createSmtpMailer(smtpSettings(env))
+}
+
+/** Lê as definições de SMTP, limpando o que vem colado à volta (espaços, quebras de linha). */
+export function smtpSettings(env: NodeJS.ProcessEnv) {
+  const host = required(env, 'SMTP_HOST').trim()
+  const user = required(env, 'SMTP_USER').trim()
+  // O Google mostra a password de app em 4 grupos com espaços; o servidor quer as 16 letras seguidas.
+  const pass = required(env, 'SMTP_PASS').replace(/\s+/g, '')
+  if (/(^|\.)gmail\.com$/i.test(host) && !/^[a-z]{16}$/i.test(pass)) {
+    throw new Error('SMTP_PASS não é uma password de app do Google (são 16 letras, criadas em myaccount.google.com/apppasswords)')
+  }
+  return { host, port: Number(env.SMTP_PORT ?? 465), user, pass, from: env.SMTP_FROM?.trim() || `Remind <${user}>` }
 }
 
 export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
