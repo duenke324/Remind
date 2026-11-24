@@ -30,9 +30,10 @@ function mailerFromEnv(env: NodeJS.ProcessEnv): Mailer {
 
 export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
   const pool = new pg.Pool({ connectionString: required(env, 'DATABASE_URL'), max: 3 })
+  const mailer = mailerFromEnv(env)
   const config: AuthConfig = {
     pool,
-    mailer: mailerFromEnv(env),
+    mailer,
     baseURL: required(env, 'BETTER_AUTH_URL'),
     secret: required(env, 'BETTER_AUTH_SECRET'),
     google: oauth(env, 'GOOGLE'),
@@ -40,5 +41,5 @@ export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
     // Só para testes automáticos locais; em produção o limite está sempre ligado.
     rateLimit: env.NODE_ENV === 'production' || env.REMIND_RATE_LIMIT !== 'off'
   }
-  return { auth: createAuth(config), pool, baseURL: config.baseURL }
+  return { auth: createAuth(config), pool, baseURL: config.baseURL, mailer }
 }
