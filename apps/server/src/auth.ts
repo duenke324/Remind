@@ -1,6 +1,6 @@
 import { betterAuth } from 'better-auth'
 import { getMigrations } from 'better-auth/db/migration'
-import { bearer, oneTimeToken, twoFactor } from 'better-auth/plugins'
+import { admin, bearer, oneTimeToken, twoFactor } from 'better-auth/plugins'
 import type pg from 'pg'
 import { otpEmail, resetPasswordEmail, verificationEmail } from './emails'
 import type { Mailer } from './mailer'
@@ -20,14 +20,20 @@ export interface AuthConfig {
   google?: OAuthCredentials
   github?: OAuthCredentials
   rateLimit?: boolean
+  /** Outras origens que podem fazer pedidos com sessão (ex.: https://admin.remind.uno). */
+  trustedOrigins?: string[]
+  /** Emails (em minúsculas) que ficam com papel de admin. */
+  adminEmails?: string[]
 }
 
 export function createAuth(config: AuthConfig) {
   const { mailer } = config
+  const adminEmails = config.adminEmails ?? []
   return betterAuth({
     appName: 'Remind',
     baseURL: config.baseURL,
     secret: config.secret,
+    trustedOrigins: config.trustedOrigins ?? [],
     database: config.pool,
     emailAndPassword: {
       enabled: true,
@@ -54,7 +60,14 @@ export function createAuth(config: AuthConfig) {
       user: {
         create: {
           // A verificação em dois passos por email é obrigatória para todas as contas.
-          before: async (user) => ({ data: { ...user, twoFactorEnabled: true } })
+          // Quem está em ADMIN_EMAILS fica logo com papel de admin.
+          before: async (user) => ({
+            data: {
+              ...user,
+              twoFactorEnabled: true,
+              ...(adminEmails.includes(user.email.toLowerCase()) && { role: 'admin' })
+            }
+          })
         }
       }
     },
@@ -77,7 +90,14 @@ export function createAuth(config: AuthConfig) {
       // A app desktop guarda o token da sessão (bearer) em vez de cookies.
       bearer(),
       // Entrega a sessão do login Google/GitHub (feito no browser) à app desktop.
-      oneTimeToken({ expiresIn: 3 })
+      oneTimeToken({ expiresIn: 3 }),
+      // Papéis (user/admin) e contas banidas. As rotas /api/auth/admin/* ficam fechadas ao exterior (ver app.ts):
+      // o painel usa /api/admin, que só expõe ações escolhidas e regista cada uma.
+      admin({
+        defaultRole: 'user',
+        adminRoles: ['admin'],
+        bannedUserMessage: 'Esta conta foi suspensa. Contacta o suporte do Remind.'
+      })
     ]
   })
 }

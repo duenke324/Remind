@@ -18,6 +18,7 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
   const store = useMemo(() => new PageStore(user.id), [user.id])
   const sync = useMemo(() => new SyncEngine(store), [store])
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
+  const [overLimit, setOverLimit] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const pages = useLive<LocalPage[]>(
     async () => {
@@ -36,8 +37,10 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
   useEffect(() => {
     sync.start()
     const off = sync.subscribe(setSyncStatus)
+    const offLimit = sync.onLimit(setOverLimit)
     return () => {
       off()
+      offLimit()
       sync.stop()
       store.db.close()
     }
@@ -104,6 +107,11 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
           />
         )}
         <main className="main">
+          {overLimit > 0 && (
+            <div className="limit-banner" role="status" data-testid="limit-banner">
+              {t('ws.limitBanner', { count: String(overLimit) })}
+            </div>
+          )}
           {current ? (
             // Um ecrã novo por página: nada do estado da página anterior (título a meio, menus) passa para a seguinte.
             <PageView key={current.id} page={current} sidebarOpen={sidebarOpen} onExpand={() => setSidebarOpen(true)} />

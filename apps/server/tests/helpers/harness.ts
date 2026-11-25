@@ -3,6 +3,7 @@ import { createApp } from '../../src/app'
 import { createAuth, migrate } from '../../src/auth'
 import { createMemoryMailer } from '../../src/mailer'
 import { migratePages } from '../../src/pages/schema'
+import { migratePlans } from '../../src/plans'
 
 export const DATABASE_URL = process.env.TEST_DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/remind_test'
 export const BASE_URL = 'http://localhost:8787'
@@ -22,6 +23,7 @@ export function createHarness() {
   async function setup() {
     await migrate(auth)
     await migratePages(pool)
+    await migratePlans(pool)
   }
 
   /** Cliente HTTP com cookies (como um browser) e, opcionalmente, um token bearer (como a app desktop). */

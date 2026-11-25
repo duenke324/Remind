@@ -13,6 +13,9 @@ const DEBOUNCE_MS = 800
 export class SyncEngine {
   private status: SyncStatus = 'idle'
   private listeners = new Set<(s: SyncStatus) => void>()
+  /** Páginas novas que o servidor recusou por o plano grátis já ter chegado ao limite (ficam só neste computador). */
+  private overLimit = 0
+  private limitListeners = new Set<(count: number) => void>()
   private running = false
   private again = false
   private timer: ReturnType<typeof setInterval> | null = null
@@ -41,6 +44,13 @@ export class SyncEngine {
     this.listeners.add(listener)
     listener(this.status)
     return () => this.listeners.delete(listener)
+  }
+
+  /** Avisa quantas páginas ficaram por enviar por causa do limite do plano grátis (0 = nenhuma). */
+  onLimit(listener: (count: number) => void): () => void {
+    this.limitListeners.add(listener)
+    listener(this.overLimit)
+    return () => this.limitListeners.delete(listener)
   }
 
   private onWake = () => void this.run()
@@ -105,6 +115,7 @@ export class SyncEngine {
 
     const all = await db.pages.toArray()
     const dirty = pushOrder(all.filter((p) => p.dirty), all)
+    let overLimit = 0
     for (const page of dirty) {
       const res = await this.request('PUT', `/api/pages/${page.id}`, toPayload(page))
       if (res.status === 200) {
@@ -116,6 +127,9 @@ export class SyncEngine {
       } else if (res.status === 410) {
         // Apagada noutro dispositivo.
         await db.pages.delete(page.id)
+      } else if (res.status === 402) {
+        // Plano grátis no limite: a página fica guardada aqui e volta a tentar quando houver espaço (ou Pro).
+        overLimit++
       } else if (res.status === 400 && page.parentId) {
         // Página-mãe já não existe no servidor: a página passa para o topo e volta a tentar.
         await db.pages.update(page.id, { parentId: null, rev: page.rev + 1 })
@@ -123,6 +137,10 @@ export class SyncEngine {
       } else {
         console.warn('Página recusada pelo servidor', page.id, res.status, res.data)
       }
+    }
+    if (overLimit !== this.overLimit) {
+      this.overLimit = overLimit
+      for (const listener of this.limitListeners) listener(overLimit)
     }
   }
 

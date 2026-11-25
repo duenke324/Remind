@@ -1,7 +1,9 @@
 import { Hono } from 'hono'
 import type pg from 'pg'
 import type { Auth } from './auth'
+import { adminRoutes } from './admin/routes'
 import { checkMailer, type Mailer } from './mailer'
+import { meRoutes } from './me'
 import { pageRoutes } from './pages/routes'
 import { webRoutes } from './web/routes'
 
@@ -23,7 +25,11 @@ export function createApp({ auth, pool, baseURL, mailer }: AppDeps) {
   })
   // A app pergunta que métodos de login mostrar.
   app.get('/api/config', (c) => c.json({ providers: Object.keys(auth.options.socialProviders ?? {}) }))
+  // As rotas de admin do Better Auth (inclui "entrar como" e mudar passwords) ficam fechadas: o painel usa /api/admin.
+  app.all('/api/auth/admin/*', (c) => c.json({ error: 'Não encontrado' }, 404))
   app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw))
+  app.route('/api/me', meRoutes(auth, pool))
+  app.route('/api/admin', adminRoutes(auth, pool))
   app.route('/api/pages', pageRoutes(auth, pool))
   app.route('/', webRoutes(auth, baseURL))
 
