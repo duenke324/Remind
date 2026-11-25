@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type pg from 'pg'
 import type { Auth } from './auth'
+import { checkMailer, type Mailer } from './mailer'
 import { pageRoutes } from './pages/routes'
 import { webRoutes } from './web/routes'
 
@@ -8,12 +9,18 @@ export interface AppDeps {
   auth: Auth
   pool: pg.Pool
   baseURL: string
+  /** Para o health check dizer se o envio de email funciona. */
+  mailer?: Mailer
 }
 
-export function createApp({ auth, pool, baseURL }: AppDeps) {
+export function createApp({ auth, pool, baseURL, mailer }: AppDeps) {
   const app = new Hono()
 
-  app.get('/health', (c) => c.json({ ok: true }))
+  app.get('/health', async (c) => {
+    if (!mailer) return c.json({ ok: true })
+    const email = await checkMailer(mailer)
+    return c.json({ ok: email === 'ok', email }, email === 'ok' ? 200 : 503)
+  })
   // A app pergunta que métodos de login mostrar.
   app.get('/api/config', (c) => c.json({ providers: Object.keys(auth.options.socialProviders ?? {}) }))
   app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw))
