@@ -4,6 +4,7 @@ import { useI18n, type Lang } from '../i18n'
 import { useSettings, type ThemePref } from '../settings'
 import { RestoreIcon, SearchIcon, SignOutIcon, TrashIcon } from '../ui/icons'
 import { Modal, Popover, relativeTime } from '../ui/primitives'
+import { announceUpdate } from '../ui/UpdatePrompt'
 import { useWorkspace } from './context'
 import { PageTitle } from './Sidebar'
 
@@ -169,6 +170,7 @@ export function SettingsModal({ onClose, version, serverUrl }: { onClose: () => 
           Remind · {t('ws.version', { version })} · {serverUrl}
         </p>
         <p className="muted">{t('ws.shortcuts')}</p>
+        <UpdateCheck />
       </section>
 
       <div className="modal-actions">
@@ -177,5 +179,36 @@ export function SettingsModal({ onClose, version, serverUrl }: { onClose: () => 
         </button>
       </div>
     </Modal>
+  )
+}
+
+function UpdateCheck() {
+  const { t } = useI18n()
+  const [state, setState] = useState<'idle' | 'checking' | 'current' | 'error'>('idle')
+  return (
+    <div className="settings-row">
+      <span>
+        <button
+          className="btn btn-outline btn-sm"
+          data-testid="check-updates"
+          disabled={state === 'checking'}
+          onClick={async () => {
+            setState('checking')
+            const result = await window.remind.updates.check()
+            if (result.status === 'available') {
+              setState('idle')
+              announceUpdate(result.update)
+            } else setState(result.status)
+          }}
+        >
+          {state === 'checking' ? t('upd.checking') : t('upd.check')}
+        </button>
+        {(state === 'current' || state === 'error') && (
+          <span className="muted update-status" data-testid="update-status">
+            {t(state === 'current' ? 'upd.current' : 'upd.error')}
+          </span>
+        )}
+      </span>
+    </div>
   )
 }

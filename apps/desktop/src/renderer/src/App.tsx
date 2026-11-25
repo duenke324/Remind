@@ -5,6 +5,7 @@ import { AuthScreen } from './auth/AuthScreen'
 import { I18nProvider } from './i18n'
 import { SettingsProvider, useSettings } from './settings'
 import { Logo } from './ui/Logo'
+import { UpdatePrompt } from './ui/UpdatePrompt'
 import { Workspace } from './workspace/Workspace'
 
 function Root() {
@@ -33,6 +34,7 @@ function Root() {
       ) : (
         <Workspace key={auth.user.id} user={auth.user} offline={Boolean(auth.offline)} version={info.version} serverUrl={info.serverUrl} />
       )}
+      {info && <UpdatePrompt current={info.version} platform={info.platform} />}
       {info && (
         <span className="app-version" data-testid="app-version" hidden>
           v{info.version}

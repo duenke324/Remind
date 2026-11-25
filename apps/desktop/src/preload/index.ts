@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import type { DeepLink } from '../shared/deep-link'
+import type { UpdateInfo } from '../shared/update'
 import type { ApiResponse, AuthResult, AuthState, SignInResult, SocialProvider } from '../shared/types'
 
 export interface AppInfo {
@@ -18,6 +19,13 @@ const api = {
   getInfo: (): Promise<AppInfo> => ipcRenderer.invoke('app:info'),
   openExternal: (url: string): Promise<void> => ipcRenderer.invoke('shell:open-external', url),
   onDeepLink: (listener: (link: DeepLink) => void) => on('deep-link', listener),
+
+  updates: {
+    check: (): Promise<{ status: 'available'; update: UpdateInfo } | { status: 'current'; version: string } | { status: 'error' }> =>
+      ipcRenderer.invoke('update:check'),
+    pending: (): Promise<UpdateInfo | null> => ipcRenderer.invoke('update:pending'),
+    onAvailable: (listener: (update: UpdateInfo) => void) => on('update:available', listener)
+  },
 
   auth: {
     state: (): Promise<AuthState> => ipcRenderer.invoke('auth:state'),
