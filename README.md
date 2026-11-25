@@ -23,9 +23,15 @@ npm run lint         # verifica tipos
 
 ## Publicar uma versão
 
-1. Sobe a versão em `apps/desktop/package.json` (ex.: `0.2.0`) e junta ao `main`.
-2. No GitHub: **Releases → Draft a new release**, cria a tag `v0.2.0` a partir do `main` e carrega em **Publish release**.
-3. O workflow **Instaladores** gera o `.exe` (Windows) e os `.dmg` (Mac Apple Silicon e Intel) e anexa-os à Release (~3 min).
+**Actions → Instaladores → Run workflow** → ramo `main` → liga **Lançar versão** → **Run workflow**.
+
+O workflow usa sempre o `main` atual, escolhe a versão seguinte à última Release (ou a que escreveres no
+campo *Versão*), gera o `.exe` (Windows) e os `.dmg` (Mac Apple Silicon e Intel), verifica que o instalador
+conhece o servidor e que a app do Mac está assinada, e só então cria a Release com os ficheiros (~12 min).
+Não é preciso mudar a versão no `package.json`: o número entra na app durante o build.
+
+Também funciona publicar uma Release à mão (**Releases → Draft a new release**): os instaladores são gerados
+e anexados. Atenção: a Release usa o `main` do momento em que a página foi aberta.
 
 ### Servidor de contas dentro dos instaladores
 
@@ -36,12 +42,8 @@ Os instaladores ligam-se ao endereço em `apps/desktop/.env.production` (`MAIN_V
 
 O repositório é público, por isso os botões do site apontam diretamente para a última Release deste
 repositório (`releases/latest/download/...`): o download começa logo, sem passar por nenhuma página.
-Cada Release publicada (tag `vX.Y.Z`) gera os instaladores e anexa-os automaticamente.
+Cada versão lançada fica disponível nos botões do site logo que a Release tem os ficheiros.
 
-Se um dia o código passar a privado, os instaladores podem ir para um repositório público à parte
-(`remind-downloads`): basta criar o segredo `DOWNLOADS_TOKEN` (token com **Contents: Read and write** só nesse
-repositório) e mudar `VITE_DOWNLOAD_BASE` no site.
-
-Para gerar instaladores sem criar Release: **Actions → Instaladores → Run workflow** (ficam em "Artifacts").
+Para gerar instaladores sem criar Release: **Run workflow** com **Lançar versão** desligado (ficam em "Artifacts").
 
 > Os instaladores ainda não são assinados: o Windows mostra um aviso do SmartScreen ("Mais informações → Executar mesmo assim") e, no Mac, é preciso abrir em **Definições → Privacidade e segurança → Abrir mesmo assim** (a app tem assinatura ad-hoc, sem notarização da Apple).
