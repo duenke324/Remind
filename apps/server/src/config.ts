@@ -57,7 +57,12 @@ export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
     github: oauth(env, 'GITHUB'),
     // Só para testes automáticos locais; em produção o limite está sempre ligado.
     rateLimit: env.NODE_ENV === 'production' || env.REMIND_RATE_LIMIT !== 'off',
-    adminEmails: adminEmails(env)
+    adminEmails: adminEmails(env),
+    // O painel de admin (admin.remind.uno) e o domínio próprio da API usam a mesma sessão.
+    trustedOrigins: (env.TRUSTED_ORIGINS ?? 'https://admin.remind.uno,https://api.remind.uno')
+      .split(',')
+      .map((o) => o.trim())
+      .filter((o) => /^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(o))
   }
   return { auth: createAuth(config), pool, baseURL: config.baseURL, mailer, adminEmails: config.adminEmails ?? [] }
 }

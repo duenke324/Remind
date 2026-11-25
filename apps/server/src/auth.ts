@@ -20,6 +20,8 @@ export interface AuthConfig {
   google?: OAuthCredentials
   github?: OAuthCredentials
   rateLimit?: boolean
+  /** Outras origens que podem fazer pedidos com sessão (ex.: https://admin.remind.uno). */
+  trustedOrigins?: string[]
   /** Emails (em minúsculas) que ficam com papel de admin. */
   adminEmails?: string[]
 }
@@ -31,6 +33,7 @@ export function createAuth(config: AuthConfig) {
     appName: 'Remind',
     baseURL: config.baseURL,
     secret: config.secret,
+    trustedOrigins: config.trustedOrigins ?? [],
     database: config.pool,
     emailAndPassword: {
       enabled: true,
