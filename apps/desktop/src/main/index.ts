@@ -139,8 +139,9 @@ function registerIpc(): void {
   })
 
   ipcMain.handle('api:request', async (_e, method: unknown, path: unknown, body: unknown) => {
-    if (method !== 'GET' && method !== 'PUT' && method !== 'DELETE') return { status: 400, data: null }
-    const res = await auth.api(method, str(path, 200), body)
+    // auth.api só aceita os pedidos da lista em shared/api-paths.ts.
+    if (typeof method !== 'string') return { status: 400, data: null }
+    const res = await auth.api(method, str(path, 4500), body)
     if (res.status === 401) notifyAuthChanged()
     return res
   })

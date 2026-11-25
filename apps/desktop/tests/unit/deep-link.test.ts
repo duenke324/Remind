@@ -11,6 +11,8 @@ describe('parseDeepLink', () => {
 
   it('abre uma página pelo id', () => {
     expect(parseDeepLink('remind://page/9f1c2e')).toEqual({ kind: 'open-page', pageId: '9f1c2e' })
+    expect(parseDeepLink('remind://calendar/connected')).toEqual({ kind: 'calendar-connected' })
+    expect(parseDeepLink('remind://calendar/other')).toBeNull()
   })
 
   it('rejeita outros protocolos', () => {

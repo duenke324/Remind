@@ -3,6 +3,7 @@ import type { LocalPage } from '../data/sync-logic'
 import { childrenMap, computeDrop, type DropPosition } from '../data/tree'
 import { useI18n } from '../i18n'
 import {
+  CalendarIcon,
   ChevronIcon,
   CopyIcon,
   DotsIcon,
@@ -43,9 +44,11 @@ interface Props {
   onSettings: () => void
   onTrash: (anchor: HTMLElement) => void
   onCollapse: () => void
+  onCalendar: () => void
+  calendarActive: boolean
 }
 
-export function Sidebar({ onSearch, onSettings, onTrash, onCollapse }: Props) {
+export function Sidebar({ onSearch, onSettings, onTrash, onCollapse, onCalendar, calendarActive }: Props) {
   const { t } = useI18n()
   const { user, pages, store, currentId, open, createPage } = useWorkspace()
   const [expanded, setExpanded] = useState(loadExpanded)
@@ -221,6 +224,9 @@ export function Sidebar({ onSearch, onSettings, onTrash, onCollapse }: Props) {
       <nav className="sidebar-actions">
         <button className="nav-item" onClick={onSearch} data-testid="open-search">
           <SearchIcon /> <span>{t('ws.search')}</span> <kbd>Ctrl K</kbd>
+        </button>
+        <button className={`nav-item${calendarActive ? ' active' : ''}`} onClick={onCalendar} data-testid="open-calendar">
+          <CalendarIcon /> <span>{t('cal.title')}</span>
         </button>
         <button className="nav-item" onClick={onSettings}>
           <GearIcon /> <span>{t('ws.settings')}</span>

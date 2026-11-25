@@ -1,3 +1,4 @@
+import { isAllowedApiRequest } from '../shared/api-paths'
 import { randomBytes } from 'node:crypto'
 import type { ApiResponse, AuthResult, AuthState, SignInResult, SocialProvider, User } from '../shared/types'
 import { clearSession, loadSession, saveSession } from './session-store'
@@ -211,8 +212,8 @@ export class AuthClient {
   }
 
   /** Pedidos à API de páginas com o token da sessão. Só caminhos /api/pages são permitidos. */
-  async api(method: 'GET' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<ApiResponse> {
-    if (!/^\/api\/pages(\/[A-Za-z0-9_-]{1,64})?(\?since=\d{1,19})?$/.test(path)) return { status: 400, data: null }
+  async api(method: string, path: string, body?: unknown): Promise<ApiResponse> {
+    if (!isAllowedApiRequest(method, path)) return { status: 400, data: null }
     if (!this.session) return { status: 401, data: null }
     try {
       const res = await this.http(path, { method, body, bearer: true })

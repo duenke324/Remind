@@ -49,12 +49,18 @@ export function createAuth(config: AuthConfig) {
       sendVerificationEmail: async ({ user, url }) => mailer.send(verificationEmail(user.email, url))
     },
     socialProviders: {
-      ...(config.google && { google: { ...config.google, prompt: 'select_account' as const } }),
+      // offline + consent: a Google entrega um refresh token, para o calendário continuar ligado sem voltar a pedir.
+      ...(config.google && { google: { ...config.google, prompt: 'select_account consent' as const, accessType: 'offline' as const } }),
       ...(config.github && { github: config.github })
     },
     account: {
       // Liga a conta Google/GitHub a uma conta existente com o mesmo email verificado.
-      accountLinking: { enabled: true, trustedProviders: ['google', 'github'] }
+      accountLinking: {
+        enabled: true,
+        trustedProviders: ['google', 'github'],
+        // Ligar o calendário de uma conta Google com outro email (a pessoa já tem sessão no Remind).
+        allowDifferentEmails: true
+      }
     },
     databaseHooks: {
       user: {

@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import type pg from 'pg'
 import type { Auth } from './auth'
 import { adminRoutes } from './admin/routes'
+import { calendarRoutes } from './calendar/routes'
+import type { Fetch } from './calendar/google'
 import { checkMailer, type Mailer } from './mailer'
 import { meRoutes } from './me'
 import { pageRoutes } from './pages/routes'
@@ -13,9 +15,13 @@ export interface AppDeps {
   baseURL: string
   /** Para o health check dizer se o envio de email funciona. */
   mailer?: Mailer
+  /** Para os testes simularem a Google. */
+  fetchImpl?: Fetch
+  /** Só fora de produção (testes ponta a ponta): outra morada para a Google Calendar API. */
+  googleCalendarApi?: string
 }
 
-export function createApp({ auth, pool, baseURL, mailer }: AppDeps) {
+export function createApp({ auth, pool, baseURL, mailer, fetchImpl, googleCalendarApi }: AppDeps) {
   const app = new Hono()
 
   app.get('/health', async (c) => {
@@ -30,6 +36,7 @@ export function createApp({ auth, pool, baseURL, mailer }: AppDeps) {
   app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw))
   app.route('/api/me', meRoutes(auth, pool))
   app.route('/api/admin', adminRoutes(auth, pool))
+  app.route('/api/calendar', calendarRoutes(auth, pool, baseURL, fetchImpl, googleCalendarApi))
   app.route('/api/pages', pageRoutes(auth, pool))
   app.route('/', webRoutes(auth, baseURL))
 

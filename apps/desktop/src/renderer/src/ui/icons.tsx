@@ -64,3 +64,6 @@ export const ImageIcon = (p: IconProps) => (
 export const SmileIcon = (p: IconProps) => (
   <Icon {...p}><circle cx="10" cy="10" r="7" /><path d="M7 11.5a3.5 3.5 0 0 0 6 0M7.5 8h.01M12.5 8h.01" /></Icon>
 )
+export const CalendarIcon = (p: IconProps) => (
+  <Icon {...p}><rect x="3.5" y="4.5" width="13" height="12" rx="2" /><path d="M3.5 8.5h13M7 3v3M13 3v3" /></Icon>
+)

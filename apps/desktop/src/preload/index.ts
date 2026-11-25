@@ -38,6 +38,12 @@ const api = {
   pages: {
     request: (method: 'GET' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<ApiResponse> =>
       ipcRenderer.invoke('api:request', method, path, body)
+  },
+
+  /** Outros pedidos ao servidor (conta, calendário). O processo principal só deixa passar os conhecidos. */
+  api: {
+    request: <T = unknown>(method: 'GET' | 'POST' | 'PATCH' | 'DELETE', path: string, body?: unknown): Promise<ApiResponse<T>> =>
+      ipcRenderer.invoke('api:request', method, path, body)
   }
 }
 

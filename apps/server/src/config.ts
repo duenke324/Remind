@@ -64,5 +64,13 @@ export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
       .map((o) => o.trim())
       .filter((o) => /^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(o))
   }
-  return { auth: createAuth(config), pool, baseURL: config.baseURL, mailer, adminEmails: config.adminEmails ?? [] }
+  return {
+    auth: createAuth(config),
+    pool,
+    baseURL: config.baseURL,
+    mailer,
+    adminEmails: config.adminEmails ?? [],
+    // Testes ponta a ponta: uma "Google" local. Nunca em produção.
+    googleCalendarApi: env.NODE_ENV !== 'production' && env.GOOGLE_CALENDAR_API_URL ? env.GOOGLE_CALENDAR_API_URL : undefined
+  }
 }
