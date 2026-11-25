@@ -1454,6 +1454,23 @@ kbd {
   font-size: 11px;
 }
 
+.cal-footer {
+  order: 99;
+  display: flex;
+  justify-content: flex-end;
+}
+.btn-link {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+.btn-link:hover {
+  color: var(--fg);
+}
+
 /* Janela do evento */
 .cal-modal {
   width: min(460px, calc(100vw - 32px));

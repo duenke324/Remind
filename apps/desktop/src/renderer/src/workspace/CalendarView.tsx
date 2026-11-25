@@ -197,6 +197,19 @@ export function CalendarView({ sidebarOpen, onExpand }: { sidebarOpen: boolean; 
         </div>
       )}
 
+      {ready && (
+        <div className="cal-footer">
+          <button
+            className="btn btn-link small"
+            onClick={() => {
+              if (window.confirm(t('cal.disconnectConfirm'))) void calendarApi.disconnect().then(refresh, refresh)
+            }}
+          >
+            {t('cal.disconnect')}
+          </button>
+        </div>
+      )}
+
       {load.state === 'loading' && <p className="cal-message muted">{t('cal.loading')}</p>}
       {load.state === 'offline' && <p className="cal-message muted">{t('cal.offline')}</p>}
       {load.state === 'error' && (
