@@ -141,7 +141,19 @@ const pt = {
   'ws.close': 'Fechar',
   'ws.titlePlaceholder': 'Sem título',
   'ws.imageTooLarge': 'A imagem é demasiado grande (máx. 2 MB).',
-  'ws.shortcuts': 'Atalhos: Ctrl+K pesquisar · Ctrl+N nova página · Ctrl+\\ barra lateral'
+  'ws.shortcuts': 'Atalhos: Ctrl+K pesquisar · Ctrl+N nova página · Ctrl+\\ barra lateral',
+  'upd.title': 'Há uma versão nova do Remind',
+  'upd.body': 'A versão {version} já está disponível (tens a {current}). Atualiza para teres as últimas melhorias e correções.',
+  'upd.howWin': 'Depois de descarregar, abre o ficheiro Remind-Setup.exe. As tuas páginas ficam como estão.',
+  'upd.howMac': 'Depois de descarregar, abre o ficheiro .dmg e arrasta o Remind para Aplicações (substitui o antigo). As tuas páginas ficam como estão.',
+  'upd.howOther': 'Descarrega a versão nova na página que vai abrir.',
+  'upd.now': 'Atualizar agora',
+  'upd.later': 'Mais tarde',
+  'upd.whatsNew': 'Ver novidades',
+  'upd.check': 'Procurar atualizações',
+  'upd.checking': 'A procurar…',
+  'upd.current': 'Tens a versão mais recente.',
+  'upd.error': 'Não foi possível verificar agora. Tenta mais tarde.'
 }
 
 type Key = keyof typeof pt
@@ -287,7 +299,19 @@ const en: Record<Key, string> = {
   'ws.close': 'Close',
   'ws.titlePlaceholder': 'Untitled',
   'ws.imageTooLarge': 'Image is too large (max 2 MB).',
-  'ws.shortcuts': 'Shortcuts: Ctrl+K search · Ctrl+N new page · Ctrl+\\ sidebar'
+  'ws.shortcuts': 'Shortcuts: Ctrl+K search · Ctrl+N new page · Ctrl+\\ sidebar',
+  'upd.title': 'A new version of Remind is available',
+  'upd.body': 'Version {version} is out (you have {current}). Update to get the latest improvements and fixes.',
+  'upd.howWin': 'After downloading, open Remind-Setup.exe. Your pages stay as they are.',
+  'upd.howMac': 'After downloading, open the .dmg and drag Remind to Applications (replacing the old one). Your pages stay as they are.',
+  'upd.howOther': 'Download the new version from the page that opens.',
+  'upd.now': 'Update now',
+  'upd.later': 'Later',
+  'upd.whatsNew': "What's new",
+  'upd.check': 'Check for updates',
+  'upd.checking': 'Checking…',
+  'upd.current': "You're on the latest version.",
+  'upd.error': "Couldn't check right now. Try again later."
 }
 
 export type Lang = 'pt' | 'en'

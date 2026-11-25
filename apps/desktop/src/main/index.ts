@@ -3,6 +3,7 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { PROTOCOL, findDeepLinkInArgv, parseDeepLink, type DeepLink } from '../shared/deep-link'
 import type { SocialProvider } from '../shared/types'
 import { AuthClient } from './auth-client'
+import { checkForUpdate, pendingUpdate, watchForUpdates } from './updates'
 
 // Endereço do servidor: variável de ambiente (testes) > valor da build > servidor local.
 // `||` e não `??`: um valor vazio (variável definida mas sem conteúdo) não pode ganhar ao seguinte.
@@ -146,6 +147,9 @@ function registerIpc(): void {
     return res
   })
 
+  ipcMain.handle('update:check', () => checkForUpdate())
+  ipcMain.handle('update:pending', () => pendingUpdate())
+
   ipcMain.handle('shell:open-external', (_e, url: unknown) => {
     const value = str(url, 2000)
     if (value.startsWith('https://')) void shell.openExternal(value)
@@ -157,6 +161,7 @@ void app.whenReady().then(() => {
   registerIpc()
   deliverLink(findDeepLinkInArgv(process.argv))
   createWindow()
+  watchForUpdates(() => mainWindow)
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })

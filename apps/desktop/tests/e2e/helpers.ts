@@ -70,11 +70,12 @@ export interface RunningApp {
 }
 
 /** Arranca a app com uma pasta de dados própria (como se fosse outro computador). */
-export async function launchApp(serverUrl: string, userData?: string): Promise<RunningApp & { userData: string }> {
+export async function launchApp(serverUrl: string, userData?: string, env: Record<string, string> = {}): Promise<RunningApp & { userData: string }> {
   const dir = userData ?? mkdtempSync(join(tmpdir(), 'remind-e2e-'))
   const app = await electron.launch({
     args: [APP_DIR, '--no-sandbox', '--lang=pt-PT'],
-    env: { ...process.env, REMIND_SERVER_URL: serverUrl, REMIND_USER_DATA: dir, LANG: 'pt_PT.UTF-8' }
+    // Por omissão a procura de atualizações vai para um endereço que não responde (os testes não falam com o GitHub).
+    env: { ...process.env, REMIND_SERVER_URL: serverUrl, REMIND_USER_DATA: dir, LANG: 'pt_PT.UTF-8', REMIND_UPDATE_RELEASES: 'http://127.0.0.1:9/releases', ...env }
   })
   const window = await app.firstWindow()
   await window.waitForLoadState('domcontentloaded')
