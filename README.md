@@ -34,16 +34,13 @@ Os instaladores ligam-se ao endereço em `apps/desktop/.env.production` (`MAIN_V
 
 ### Downloads públicos (botões do site)
 
-O código é privado; os instaladores ficam no repositório **público** `duenke324/remind-downloads`, para onde
-apontam os botões do site (o download começa logo, sem passar por nenhuma página).
+O repositório é público, por isso os botões do site apontam diretamente para a última Release deste
+repositório (`releases/latest/download/...`): o download começa logo, sem passar por nenhuma página.
+Cada Release publicada (tag `vX.Y.Z`) gera os instaladores e anexa-os automaticamente.
 
-Configuração (uma vez):
-1. Criar o repositório público `remind-downloads` com um README.
-2. Criar um token *fine-grained* com acesso só a esse repositório e permissão **Contents: Read and write**.
-3. Em `remind` → Settings → Secrets and variables → Actions, criar o segredo `DOWNLOADS_TOKEN` com esse token.
-
-A partir daí, cada Release publicada aparece também nos downloads públicos. Para publicar a versão atual
-sem criar Release: **Actions → Instaladores → Run workflow → Publicar nos downloads públicos**.
+Se um dia o código passar a privado, os instaladores podem ir para um repositório público à parte
+(`remind-downloads`): basta criar o segredo `DOWNLOADS_TOKEN` (token com **Contents: Read and write** só nesse
+repositório) e mudar `VITE_DOWNLOAD_BASE` no site.
 
 Para gerar instaladores sem criar Release: **Actions → Instaladores → Run workflow** (ficam em "Artifacts").
 
