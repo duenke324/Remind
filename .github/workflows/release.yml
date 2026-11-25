@@ -56,6 +56,15 @@ jobs:
         run: npm run ${{ matrix.script }} -w @remind/desktop
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          # A assinatura do Mac é ad-hoc (sem certificado nem segredos), por isso pode correr também em PRs.
+          CSC_FOR_PULL_REQUEST: 'true'
+      - name: Verificar assinatura do Mac
+        if: runner.os == 'macOS'
+        run: |
+          for app in apps/desktop/release/mac*/Remind.app; do
+            codesign --verify --deep --strict --verbose=2 "$app"
+            codesign -dv "$app" 2>&1 | grep -E '^(Identifier|Signature|Format)'
+          done
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: instalador-${{ matrix.os }}
