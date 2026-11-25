@@ -2,12 +2,18 @@
 import { getRequestListener } from '@hono/node-server'
 import { createApp } from './app'
 import { fromEnv } from './config'
+import { promoteAdmins } from './plans'
 
 let app: ReturnType<typeof createApp> | null = null
 
 export default getRequestListener((request) => {
   try {
-    app ??= createApp(fromEnv())
+    if (!app) {
+      const deps = fromEnv()
+      app = createApp(deps)
+      // Garante que quem está em ADMIN_EMAILS tem papel de admin (contas criadas antes de estar na lista).
+      promoteAdmins(deps.pool, deps.adminEmails).catch((error) => console.error('[admin] promoteAdmins falhou:', error))
+    }
   } catch (error) {
     // Configuração incompleta (ex.: variável em falta): diz qual, sem revelar valores.
     console.error(error)

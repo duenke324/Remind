@@ -37,6 +37,14 @@ export function smtpSettings(env: NodeJS.ProcessEnv) {
   return { host, port: Number(env.SMTP_PORT ?? 465), user, pass, from: env.SMTP_FROM?.trim() || `Remind <${user}>` }
 }
 
+/** ADMIN_EMAILS="a@x.pt, b@y.pt" → ['a@x.pt', 'b@y.pt'] */
+export function adminEmails(env: NodeJS.ProcessEnv): string[] {
+  return (env.ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => /^[^@\s]+@[^@\s]+$/.test(e))
+}
+
 export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
   const pool = new pg.Pool({ connectionString: required(env, 'DATABASE_URL'), max: 3 })
   const mailer = mailerFromEnv(env)
@@ -48,7 +56,8 @@ export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
     google: oauth(env, 'GOOGLE'),
     github: oauth(env, 'GITHUB'),
     // Só para testes automáticos locais; em produção o limite está sempre ligado.
-    rateLimit: env.NODE_ENV === 'production' || env.REMIND_RATE_LIMIT !== 'off'
+    rateLimit: env.NODE_ENV === 'production' || env.REMIND_RATE_LIMIT !== 'off',
+    adminEmails: adminEmails(env)
   }
-  return { auth: createAuth(config), pool, baseURL: config.baseURL, mailer }
+  return { auth: createAuth(config), pool, baseURL: config.baseURL, mailer, adminEmails: config.adminEmails ?? [] }
 }

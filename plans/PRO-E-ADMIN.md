@@ -13,6 +13,7 @@ Pro com os 4 benefícios abaixo. Nada é anunciado no site ou na app antes de fu
 | Exportar | — | PDF e Markdown |
 | Importar do Notion (export Markdown) | — | sim |
 | Temas de cor + distintivo Pro | — | sim |
+| Calendário com o Google (ver e editar eventos) | calendário principal | todos os calendários |
 | Sincronização, 2 passos, offline | sim | sim |
 
 Quem deixa de pagar não perde nada: as páginas acima do limite ficam só de leitura até apagar ou voltar ao Pro;
@@ -41,7 +42,14 @@ os ficheiros continuam visíveis mas não se carregam novos.
    - Histórico: `page_version` (uma versão a cada 5 min de edição), painel para ver e recuperar.
    - Exportar PDF (impressão do Electron) e Markdown; importar a exportação Markdown do Notion.
    - Temas de cor e distintivo Pro.
-5. **Site**: secção de preços em remind.uno + página "Pro"; termos e privacidade.
+5. **Calendário** (pedido a 25/11): separador Calendário na app (mês/semana/dia) ligado ao Google Calendar.
+   - Ligar a conta Google a partir da app (abre o browser; o Remind só guarda o acesso no servidor).
+   - Ver, criar, editar e apagar eventos; as alterações aparecem no Google e vice-versa.
+   - Grátis: só o calendário principal. Pro: todos os calendários da conta.
+   - Precisa de um projeto no Google Cloud com a Google Calendar API e um cliente OAuth (o mesmo serve para
+     o "Entrar com Google"). Até a Google rever a app, só até 100 contas de teste podem ligar o calendário;
+     a revisão pede política de privacidade e termos em remind.uno.
+6. **Site**: secção de preços em remind.uno + página "Pro"; termos e privacidade.
 
 ## O que preciso de ti
 
@@ -49,3 +57,4 @@ os ficheiros continuam visíveis mas não se carregam novos.
 - Atividade aberta nas Finanças antes de cobrar a sério; com Stripe as faturas certificadas pela AT
   ficam do teu lado (ex.: InvoiceXpress/Moloni ligado ao Stripe). Confirmar com um contabilista.
 - O email da tua conta Remind para seres o primeiro admin.
+- Projeto no Google Cloud (guio-te passo a passo) para o calendário e o login com Google.

@@ -83,6 +83,8 @@ const pt = {
   'ws.synced': 'Sincronizado',
   'ws.syncing': 'A sincronizar…',
   'ws.offline': 'Offline: as alterações ficam guardadas e sincronizam depois',
+  'ws.limitBanner':
+    'Chegaste às 50 páginas do plano grátis. {count} página(s) nova(s) ficam só neste computador até apagares páginas antigas (incluindo do lixo) ou passares a Pro.',
   'ws.syncError': 'Erro ao sincronizar. Vamos tentar de novo.',
   'ws.searchPlaceholder': 'Pesquisar páginas…',
   'ws.noResults': 'Sem resultados.',
@@ -190,6 +192,8 @@ const en: Record<Key, string> = {
   'ws.synced': 'Synced',
   'ws.syncing': 'Syncing…',
   'ws.offline': 'Offline: changes are saved and will sync later',
+  'ws.limitBanner':
+    "You've reached the free plan's 50 pages. {count} new page(s) stay on this computer only until you delete old pages (including from the trash) or upgrade to Pro.",
   'ws.syncError': "Sync failed. We'll retry.",
   'ws.searchPlaceholder': 'Search pages…',
   'ws.noResults': 'No results.',

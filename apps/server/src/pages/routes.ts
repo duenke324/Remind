@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import type pg from 'pg'
 import * as z from 'zod'
 import type { Auth } from '../auth'
+import { FREE_PAGE_LIMIT, pageCount, planOf } from '../plans'
 
 const ID = /^[A-Za-z0-9_-]{1,64}$/
 const MAX_BODY_BYTES = 5 * 1024 * 1024
@@ -66,8 +67,9 @@ export type Page = ReturnType<typeof toPage>
 /** Recusa o pedido sem alterar nada (a transação é desfeita pelo chamador). */
 class Rejection {
   constructor(
-    readonly status: 400 | 404 | 410,
-    readonly message: string
+    readonly status: 400 | 402 | 404 | 410,
+    readonly message: string,
+    readonly code?: string
   ) {}
 }
 
@@ -117,6 +119,10 @@ export function pageRoutes(auth: Auth, pool: pg.Pool) {
       const row = (await db.query<PageRow>('select * from page where id = $1 for update', [id])).rows[0]
       if (row && row.user_id !== userId) throw new Rejection(404, 'não encontrada')
       if (row?.deleted) throw new Rejection(410, 'página apagada')
+      // Contas grátis: no máximo FREE_PAGE_LIMIT páginas (as do lixo também contam). Só se aplica a páginas novas.
+      if (!row && (await planOf(db, userId)) === 'free' && (await pageCount(db, userId)) >= FREE_PAGE_LIMIT) {
+        throw new Rejection(402, `O plano grátis tem até ${FREE_PAGE_LIMIT} páginas`, 'PAGE_LIMIT')
+      }
 
       if (data.parentId) {
         if (data.parentId === id) throw new Rejection(400, 'uma página não pode estar dentro de si própria')
@@ -170,7 +176,7 @@ export function pageRoutes(auth: Auth, pool: pg.Pool) {
       return c.json({ page: toPage(saved) })
     } catch (error) {
       await db.query('rollback')
-      if (error instanceof Rejection) return c.json({ error: error.message }, error.status)
+      if (error instanceof Rejection) return c.json({ error: error.message, ...(error.code && { code: error.code }) }, error.status)
       throw error
     } finally {
       db.release()
