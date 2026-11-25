@@ -29,8 +29,14 @@ mac:
     - target: dmg
       arch: [arm64, x64]
   category: public.app-category.productivity
-  # Sem certificado Apple por agora: a app não é assinada nem notarizada.
-  identity: null
+  # Sem certificado Apple por agora: assinatura "ad-hoc" (gratuita, sem notarização).
+  # Sem nenhuma assinatura, os Macs com chip Apple dizem que a app "está danificada";
+  # com ad-hoc mostram o aviso normal e basta "Abrir mesmo assim" em Privacidade e segurança.
+  identity: '-'
+  # O runtime reforçado exige que todas as bibliotecas tenham a mesma equipa de assinatura,
+  # o que uma assinatura ad-hoc não tem: a app não arrancava.
+  hardenedRuntime: false
+  gatekeeperAssess: false
   artifactName: Remind-${arch}.${ext}
 dmg:
   title: Remind ${version}
