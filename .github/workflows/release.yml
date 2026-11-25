@@ -58,6 +58,14 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
           # A assinatura do Mac é ad-hoc (sem certificado nem segredos), por isso pode correr também em PRs.
           CSC_FOR_PULL_REQUEST: 'true'
+      - name: Verificar que o instalador conhece o servidor
+        shell: bash
+        run: |
+          # Sem isto, a app instalada diz "Esta versão do Remind ainda não tem servidor de contas configurado".
+          if ! grep -rq "remind-server.vercel.app" apps/desktop/out/main; then
+            echo "::error::O endereço do servidor (apps/desktop/.env.production) não entrou no build."
+            exit 1
+          fi
       - name: Verificar assinatura do Mac
         if: runner.os == 'macOS'
         run: |
