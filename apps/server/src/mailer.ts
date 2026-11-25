@@ -45,6 +45,9 @@ export function createSmtpMailer(config: { host: string; port: number; user: str
     host: config.host,
     port: config.port,
     secure: config.port === 465,
+    // Na porta 587 a ligação começa sem cifra e passa a TLS (STARTTLS): obrigamos essa passagem,
+    // para a chave nunca seguir em claro se alguém no caminho tentar impedir o TLS.
+    requireTLS: config.port !== 465,
     auth: { user: config.user, pass: config.pass }
   })
   return {

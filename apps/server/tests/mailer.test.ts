@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createApp } from '../src/app'
 import { createAuth } from '../src/auth'
-import { checkMailer, type Mailer } from '../src/mailer'
+import { checkMailer, createSmtpMailer, type Mailer } from '../src/mailer'
+import nodemailer from 'nodemailer'
 import pg from 'pg'
 
 const failingMailer: Mailer = {
@@ -45,5 +46,12 @@ describe('diagnóstico do email', () => {
     await checkMailer(mailer)
     await checkMailer(mailer)
     expect(verify).toHaveBeenCalledTimes(1)
+  })
+
+  it('na porta 587 (Brevo) exige TLS antes de enviar a chave', () => {
+    const spy = vi.spyOn(nodemailer, 'createTransport')
+    createSmtpMailer({ host: 'smtp-relay.brevo.com', port: 587, user: 'u', pass: 'p', from: 'a@b.pt' })
+    expect(spy.mock.calls[0]?.[0]).toMatchObject({ secure: false, requireTLS: true })
+    spy.mockRestore()
   })
 })
