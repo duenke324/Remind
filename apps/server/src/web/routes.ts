@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import type { Auth } from '../auth'
+import { CALENDAR_SCOPES } from '../calendar/google'
 
 const STATE = /^[A-Za-z0-9_-]{16,128}$/
 const MIN_PASSWORD = 8
@@ -94,6 +95,55 @@ ${error ? `<p class="error">${escapeHtml(error)}</p>` : ''}
 
   app.get('/desktop/oauth/error', (c) =>
     c.html(page('Erro no login', '<h1>Não foi possível entrar</h1><p>O login foi cancelado ou falhou. Volta à app e tenta de novo.</p>'), 400)
+  )
+
+  // Calendário Google: a app abre este link (com um token de uso único da sessão da app) e daqui segue para a Google,
+  // que pede autorização para o calendário. Na volta, a Google fica ligada à conta Remind.
+  app.get('/calendar/connect', async (c) => {
+    const token = c.req.query('token') ?? ''
+    if (!/^[A-Za-z0-9_-]{8,256}$/.test(token)) return c.html(page('Link inválido', '<h1>Link inválido</h1><p>Volta à app e tenta de novo.</p>'), 400)
+    if (!auth.options.socialProviders?.google) {
+      return c.html(page('Indisponível', '<h1>Calendário indisponível</h1><p>A ligação à Google ainda não está configurada.</p>'), 503)
+    }
+    let sessionToken: string
+    try {
+      ;({
+        session: { token: sessionToken }
+      } = await auth.api.verifyOneTimeToken({ body: { token } }))
+    } catch {
+      return c.html(page('Link expirado', '<h1>Link expirado</h1><p>Volta à app e carrega outra vez em “Ligar calendário”.</p>'), 400)
+    }
+    const res = await auth.api.linkSocialAccount({
+      headers: new Headers({ authorization: `Bearer ${sessionToken}` }),
+      body: {
+        provider: 'google',
+        scopes: CALENDAR_SCOPES,
+        callbackURL: `${baseURL}/calendar/connected`,
+        errorCallbackURL: `${baseURL}/calendar/error`
+      },
+      asResponse: true
+    })
+    const { url } = (await res.json()) as { url?: string }
+    if (!url) return c.html(page('Erro', '<h1>Não foi possível ligar</h1><p>Volta à app e tenta de novo.</p>'), 502)
+    const redirect = new Response(null, { status: 302, headers: { location: url, 'cache-control': 'no-store' } })
+    for (const cookie of res.headers.getSetCookie()) redirect.headers.append('set-cookie', cookie)
+    return redirect
+  })
+
+  app.get('/calendar/connected', (c) => {
+    const link = 'remind://calendar/connected'
+    return c.html(
+      page(
+        'Calendário ligado',
+        `<h1>Calendário ligado ✓</h1><p>Os teus eventos da Google já aparecem no Remind. Podes fechar esta janela.</p>
+<a class="btn" href="${link}">Voltar ao Remind</a>
+<meta http-equiv="refresh" content="0;url=${link}">`
+      )
+    )
+  })
+
+  app.get('/calendar/error', (c) =>
+    c.html(page('Calendário não ligado', '<h1>O calendário não foi ligado</h1><p>A autorização foi cancelada ou falhou. Volta à app e tenta de novo.</p>'), 400)
   )
 
   // 1) (registada depois das rotas fixas acima) A app abre isto no browser do sistema; daqui seguimos para o Google/GitHub.

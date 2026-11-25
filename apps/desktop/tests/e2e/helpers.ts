@@ -15,7 +15,7 @@ export interface TestServer {
 }
 
 /** Arranca o servidor real (sem SMTP: os emails aparecem no terminal, que lemos aqui). */
-export async function startServer(port: number): Promise<TestServer> {
+export async function startServer(port: number, extraEnv: Record<string, string> = {}): Promise<TestServer> {
   let output = ''
   const child: ChildProcess = spawn('npx', ['tsx', 'src/dev.ts'], {
     cwd: SERVER_DIR,
@@ -27,7 +27,8 @@ export async function startServer(port: number): Promise<TestServer> {
       BETTER_AUTH_SECRET: 'segredo-e2e-com-mais-de-32-caracteres-aqui',
       SMTP_HOST: '',
       REMIND_RATE_LIMIT: 'off',
-      NODE_ENV: 'development'
+      NODE_ENV: 'development',
+      ...extraEnv
     },
     stdio: ['ignore', 'pipe', 'pipe'],
     // Grupo de processos próprio: ao parar, termina o npx e o servidor que ele lançou.

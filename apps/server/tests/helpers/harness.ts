@@ -8,7 +8,7 @@ import { migratePlans } from '../../src/plans'
 export const DATABASE_URL = process.env.TEST_DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/remind_test'
 export const BASE_URL = 'http://localhost:8787'
 
-export function createHarness() {
+export function createHarness(options: { google?: { clientId: string; clientSecret: string }; fetchImpl?: typeof fetch } = {}) {
   const pool = new pg.Pool({ connectionString: DATABASE_URL })
   const mailer = createMemoryMailer()
   const auth = createAuth({
@@ -16,9 +16,10 @@ export function createHarness() {
     mailer,
     baseURL: BASE_URL,
     secret: 'segredo-de-teste-com-mais-de-32-caracteres!!',
-    rateLimit: false
+    rateLimit: false,
+    google: options.google
   })
-  const app = createApp({ auth, pool, baseURL: BASE_URL })
+  const app = createApp({ auth, pool, baseURL: BASE_URL, fetchImpl: options.fetchImpl })
 
   async function setup() {
     await migrate(auth)

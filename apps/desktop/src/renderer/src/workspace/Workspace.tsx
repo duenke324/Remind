@@ -8,6 +8,7 @@ import { PlusIcon, SidebarIcon } from '../ui/icons'
 import { Logo } from '../ui/Logo'
 import { WorkspaceContext, type WorkspaceValue } from './context'
 import { SearchModal, SettingsModal, TrashPopover } from './Overlays'
+import { CalendarView } from './CalendarView'
 import { PageView } from './PageView'
 import { Sidebar } from './Sidebar'
 
@@ -32,6 +33,7 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
   const [currentId, setCurrentId] = useState<string | null>(() => localStorage.getItem(lastPageKey(user.id)))
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [overlay, setOverlay] = useState<'search' | 'settings' | null>(null)
+  const [section, setSection] = useState<'pages' | 'calendar'>('pages')
   const [trashAnchor, setTrashAnchor] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
   const open = useCallback(
     (id: string | null) => {
       setCurrentId(id)
+      if (id) setSection('pages')
       try {
         if (id) localStorage.setItem(lastPageKey(user.id), id)
         else localStorage.removeItem(lastPageKey(user.id))
@@ -104,6 +107,8 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
             onSettings={() => setOverlay('settings')}
             onTrash={(anchor) => setTrashAnchor(anchor)}
             onCollapse={() => setSidebarOpen(false)}
+            onCalendar={() => setSection('calendar')}
+            calendarActive={section === 'calendar'}
           />
         )}
         <main className="main">
@@ -112,7 +117,9 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
               {t('ws.limitBanner', { count: String(overLimit) })}
             </div>
           )}
-          {current ? (
+          {section === 'calendar' ? (
+            <CalendarView sidebarOpen={sidebarOpen} onExpand={() => setSidebarOpen(true)} />
+          ) : current ? (
             // Um ecrã novo por página: nada do estado da página anterior (título a meio, menus) passa para a seguinte.
             <PageView key={current.id} page={current} sidebarOpen={sidebarOpen} onExpand={() => setSidebarOpen(true)} />
           ) : (
