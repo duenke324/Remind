@@ -31,6 +31,9 @@ export function smtpSettings(env: NodeJS.ProcessEnv) {
   if (/(^|\.)gmail\.com$/i.test(host) && !/^[a-z]{16}$/i.test(pass)) {
     throw new Error('SMTP_PASS não é uma password de app do Google (são 16 letras, criadas em myaccount.google.com/apppasswords)')
   }
+  if (/(^|\.)brevo\.com$/i.test(host) && pass.startsWith('xkeysib-')) {
+    throw new Error('SMTP_PASS tem uma chave de API do Brevo (xkeysib-). É precisa a chave SMTP (xsmtpsib-), em app.brevo.com/settings/keys/smtp')
+  }
   return { host, port: Number(env.SMTP_PORT ?? 465), user, pass, from: env.SMTP_FROM?.trim() || `Remind <${user}>` }
 }
 

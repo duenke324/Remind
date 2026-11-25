@@ -33,4 +33,9 @@ describe('configuração', () => {
   it('diz logo quando o SMTP_PASS do Gmail não é uma password de app (16 letras)', () => {
     expect(() => smtpSettings({ SMTP_HOST: 'smtp.gmail.com', SMTP_USER: 'eu@gmail.com', SMTP_PASS: 'MinhaPassword123' })).toThrow(/16 letras/)
   })
+
+  it('avisa quando no Brevo se cola a chave de API em vez da chave SMTP', () => {
+    expect(() => smtpSettings({ SMTP_HOST: 'smtp-relay.brevo.com', SMTP_USER: 'x@smtp-brevo.com', SMTP_PASS: 'xkeysib-abc' })).toThrow(/chave SMTP/)
+    expect(smtpSettings({ SMTP_HOST: 'smtp-relay.brevo.com', SMTP_USER: 'x@smtp-brevo.com', SMTP_PASS: 'xsmtpsib-abc' }).pass).toBe('xsmtpsib-abc')
+  })
 })

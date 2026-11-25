@@ -19,24 +19,34 @@ function errorCode(error: unknown): string {
   return typeof code === 'string' && /^[A-Z_]{2,32}$/.test(code) ? code : 'DESCONHECIDO'
 }
 
-const checks = new WeakMap<Mailer, Promise<string>>()
+/** Código de resposta SMTP (ex.: 535), que não contém dados da conta. */
+function responseCode(error: unknown): string {
+  const code = (error as { responseCode?: unknown })?.responseCode
+  return typeof code === 'number' && Number.isInteger(code) ? ` ${code}` : ''
+}
 
-/** Testa a ligação ao email uma vez por arranque do servidor: "ok" ou "erro: <código>". */
-export function checkMailer(mailer: Mailer): Promise<string> {
-  let check = checks.get(mailer)
-  if (!check) {
-    check = mailer.verify
-      ? mailer.verify().then(
-          () => 'ok',
-          (error) => {
-            console.error('[email] O servidor de email recusou a ligação:', errorCode(error), (error as Error)?.message)
-            return `erro: ${errorCode(error)}`
-          }
-        )
-      : Promise.resolve('ok')
-    checks.set(mailer, check)
-  }
-  return check
+/** Quanto tempo uma falha fica guardada antes de se testar outra vez (um sucesso fica para sempre). */
+export const RETRY_AFTER_MS = 60_000
+
+const checks = new WeakMap<Mailer, { result: Promise<string>; failedAt?: number }>()
+
+/** Testa a ligação ao email: "ok" ou "erro: <código>". Não faz login no servidor de email a cada pedido. */
+export function checkMailer(mailer: Mailer, now: () => number = Date.now): Promise<string> {
+  const cached = checks.get(mailer)
+  if (cached && (cached.failedAt === undefined || now() - cached.failedAt < RETRY_AFTER_MS)) return cached.result
+  const entry: { result: Promise<string>; failedAt?: number } = { result: Promise.resolve('ok') }
+  entry.result = mailer.verify
+    ? mailer.verify().then(
+        () => 'ok',
+        (error) => {
+          entry.failedAt = now()
+          console.error('[email] O servidor de email recusou a ligação:', errorCode(error), (error as Error)?.message)
+          return `erro: ${errorCode(error)}${responseCode(error)}`
+        }
+      )
+    : Promise.resolve('ok')
+  checks.set(mailer, entry)
+  return entry.result
 }
 
 /** Gmail (ou outro SMTP). Com o Gmail usa-se uma "password de app", nunca a palavra-passe da conta. */
