@@ -169,8 +169,9 @@ describe('configuração da Stripe', () => {
 })
 
 describe('sem Stripe configurada', () => {
-  const plain = createHarness()
   it('a compra diz que está indisponível', async () => {
+    // Criado aqui (depois das migrações do primeiro): o Better Auth confere o esquema ao arrancar.
+    const plain = createHarness()
     await plain.setup()
     const email = `sem-${randomUUID()}@exemplo.pt`
     await plain.createVerifiedUser(email)
