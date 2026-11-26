@@ -3,6 +3,10 @@ import './styles.css'
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /** Onde estão os instaladores (nomes fixos em todas as versões). */
+// Página de compra do Remind Pro (servidor): entra na conta e segue para a Stripe.
+const PRO_URL = import.meta.env.VITE_PRO_URL ?? 'https://api.remind.uno/pro'
+for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-buy-pro]')) a.href = PRO_URL
+
 const DOWNLOAD_BASE = (import.meta.env.VITE_DOWNLOAD_BASE ?? 'https://github.com/duenke324/Remind/releases/latest/download').replace(/\/+$/, '')
 const FILES = {
   windows: 'Remind-Setup.exe',

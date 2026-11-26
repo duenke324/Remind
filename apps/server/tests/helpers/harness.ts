@@ -1,5 +1,6 @@
 import pg from 'pg'
 import { createApp } from '../../src/app'
+import type { Stripe } from '../../src/billing/stripe'
 import { createAuth, migrate } from '../../src/auth'
 import { createMemoryMailer } from '../../src/mailer'
 import { migratePages } from '../../src/pages/schema'
@@ -8,7 +9,9 @@ import { migratePlans } from '../../src/plans'
 export const DATABASE_URL = process.env.TEST_DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/remind_test'
 export const BASE_URL = 'http://localhost:8787'
 
-export function createHarness(options: { google?: { clientId: string; clientSecret: string }; fetchImpl?: typeof fetch } = {}) {
+export function createHarness(
+  options: { google?: { clientId: string; clientSecret: string }; fetchImpl?: typeof fetch; stripe?: Stripe; stripeWebhookSecret?: string } = {}
+) {
   const pool = new pg.Pool({ connectionString: DATABASE_URL })
   const mailer = createMemoryMailer()
   const auth = createAuth({
@@ -19,7 +22,7 @@ export function createHarness(options: { google?: { clientId: string; clientSecr
     rateLimit: false,
     google: options.google
   })
-  const app = createApp({ auth, pool, baseURL: BASE_URL, fetchImpl: options.fetchImpl })
+  const app = createApp({ auth, pool, baseURL: BASE_URL, fetchImpl: options.fetchImpl, stripe: options.stripe, stripeWebhookSecret: options.stripeWebhookSecret })
 
   async function setup() {
     await migrate(auth)

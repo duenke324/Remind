@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { ApiError, auth } from './api'
 import { ErrorNote } from './ui'
 
 /** Entrar no painel: email + palavra-passe e depois o código de 6 dígitos enviado por email. */
-export function Login({ onSignedIn }: { onSignedIn: () => void }) {
+export function Login({ onSignedIn, subtitle = 'Painel de administração', footer }: { onSignedIn: () => void; subtitle?: string; footer?: ReactNode }) {
   const [step, setStep] = useState<'password' | 'otp'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -51,7 +51,7 @@ export function Login({ onSignedIn }: { onSignedIn: () => void }) {
           </span>
           <div>
             <strong>Remind</strong>
-            <span className="muted">Painel de administração</span>
+            <span className="muted">{subtitle}</span>
           </div>
         </div>
 
@@ -99,6 +99,7 @@ export function Login({ onSignedIn }: { onSignedIn: () => void }) {
         )}
         <ErrorNote error={error} />
         {info && <p className="muted">{info}</p>}
+        {footer}
       </form>
     </div>
   )

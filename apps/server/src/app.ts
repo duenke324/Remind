@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import type pg from 'pg'
 import type { Auth } from './auth'
 import { adminRoutes } from './admin/routes'
+import { billingRoutes } from './billing/routes'
+import type { Stripe } from './billing/stripe'
 import { calendarRoutes } from './calendar/routes'
 import type { Fetch } from './calendar/google'
 import { checkMailer, type Mailer } from './mailer'
@@ -19,9 +21,12 @@ export interface AppDeps {
   fetchImpl?: Fetch
   /** Só fora de produção (testes ponta a ponta): outra morada para a Google Calendar API. */
   googleCalendarApi?: string
+  /** Pagamentos (Remind Pro). Sem isto, a compra aparece como indisponível. */
+  stripe?: Stripe | null
+  stripeWebhookSecret?: string | null
 }
 
-export function createApp({ auth, pool, baseURL, mailer, fetchImpl, googleCalendarApi }: AppDeps) {
+export function createApp({ auth, pool, baseURL, mailer, fetchImpl, googleCalendarApi, stripe = null, stripeWebhookSecret = null }: AppDeps) {
   const app = new Hono()
 
   app.get('/health', async (c) => {
@@ -38,6 +43,7 @@ export function createApp({ auth, pool, baseURL, mailer, fetchImpl, googleCalend
   app.route('/api/admin', adminRoutes(auth, pool))
   app.route('/api/calendar', calendarRoutes(auth, pool, baseURL, fetchImpl, googleCalendarApi))
   app.route('/api/pages', pageRoutes(auth, pool))
+  app.route('/api/billing', billingRoutes(auth, pool, baseURL, stripe, stripeWebhookSecret))
   app.route('/', webRoutes(auth, baseURL))
 
   app.onError((error, c) => {

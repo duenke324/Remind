@@ -1149,6 +1149,43 @@ kbd {
   margin-top: 8px;
 }
 
+/* ---------- Remind Pro ---------- */
+.nav-item.nav-pro {
+  color: #7c3aed;
+}
+.nav-item.nav-pro:hover {
+  color: #6d28d9;
+}
+.limit-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.limit-banner > span {
+  flex: 1;
+}
+.pro-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 16px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  font-size: 13px;
+}
+.pro-notice > span {
+  flex: 1;
+}
+.pro-notice.error {
+  background: rgba(217, 48, 37, 0.1);
+}
+.pro-badge-btn {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
 /* ---------- Aviso de atualização ---------- */
 .update-modal {
   width: min(460px, calc(100% - 32px));

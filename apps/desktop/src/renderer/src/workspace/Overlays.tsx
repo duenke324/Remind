@@ -124,7 +124,7 @@ export function TrashPopover({ anchor, onClose }: { anchor: HTMLElement; onClose
 
 export function SettingsModal({ onClose, version, serverUrl }: { onClose: () => void; version: string; serverUrl: string }) {
   const { t } = useI18n()
-  const { user } = useWorkspace()
+  const { user, plan, openPro } = useWorkspace()
   const { settings, update } = useSettings()
 
   return (
@@ -142,6 +142,28 @@ export function SettingsModal({ onClose, version, serverUrl }: { onClose: () => 
           <button className="btn btn-outline btn-sm push-right" onClick={() => void window.remind.auth.signOut()} data-testid="sign-out">
             <SignOutIcon size={14} /> {t('ws.signOut')}
           </button>
+        </div>
+      </section>
+
+      <section className="settings-section" data-testid="settings-plan">
+        <h3>{t('pro.planTitle')}</h3>
+        <div className="settings-row">
+          <span>
+            {plan === 'pro' ? (
+              <>
+                <span className="pro-badge">Pro</span> {t('pro.planPro')}
+              </>
+            ) : plan === 'free' ? (
+              t('pro.planFree')
+            ) : (
+              <span className="muted">—</span>
+            )}
+          </span>
+          {plan && (
+            <button className={`btn btn-sm ${plan === 'pro' ? 'btn-outline' : 'btn-primary'}`} onClick={openPro} data-testid="settings-pro">
+              {plan === 'pro' ? t('pro.manage') : t('pro.upgrade')}
+            </button>
+          )}
         </div>
       </section>
 

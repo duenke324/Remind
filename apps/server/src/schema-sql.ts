@@ -10,7 +10,7 @@ const { auth, pool } = fromEnv({ ...process.env, BETTER_AUTH_URL: 'http://localh
 const { compileMigrations } = await getMigrations(auth.options)
 // O Supabase publica o esquema public na sua API REST (chave anónima). O servidor liga-se como dono das
 // tabelas e não usa essa API: RLS ligado e sem regras bloqueia o acesso público sem afetar o servidor.
-const TABLES = ['user', 'session', 'account', 'verification', 'twoFactor', 'rateLimit', 'page', 'entitlement', 'admin_audit']
+const TABLES = ['user', 'session', 'account', 'verification', 'twoFactor', 'rateLimit', 'page', 'entitlement', 'admin_audit', 'billing_customer']
 const RLS = TABLES.map((t) => `alter table "${t}" enable row level security;`).join('\n')
 process.stdout.write(`begin;\n${await compileMigrations()}\n\n-- Páginas\n${PAGES_SQL}\n\n-- Planos e auditoria\n${PLANS_SQL}\n\n-- Bloquear a API pública\n${RLS}\ncommit;\n`)
 await pool.end()

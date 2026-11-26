@@ -14,6 +14,10 @@ export interface WorkspaceValue {
   createPage: (parentId?: string | null) => Promise<void>
   syncStatus: SyncStatus
   offline: boolean
+  /** Plano da conta (null enquanto não se sabe, ex.: offline). */
+  plan: 'free' | 'pro' | null
+  /** Abre a página de compra/gestão do Remind Pro no browser. */
+  openPro: () => void
 }
 
 export const WorkspaceContext = createContext<WorkspaceValue | null>(null)

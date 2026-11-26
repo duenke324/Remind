@@ -21,6 +21,7 @@ import {
 import { useI18n } from '../i18n'
 import { ChevronIcon, PlusIcon, SidebarIcon } from '../ui/icons'
 import { Modal } from '../ui/primitives'
+import { useWorkspace } from './context'
 
 const HOUR_PX = 48
 const VIEW_KEY = 'remind.calendarView'
@@ -35,6 +36,7 @@ type Load =
 
 export function CalendarView({ sidebarOpen, onExpand }: { sidebarOpen: boolean; onExpand: () => void }) {
   const { t, lang } = useI18n()
+  const { plan, openPro } = useWorkspace()
   const locale = lang === 'pt' ? 'pt-PT' : 'en-GB'
   const [view, setView] = useState<View>(() => {
     try {
@@ -82,7 +84,7 @@ export function CalendarView({ sidebarOpen, onExpand }: { sidebarOpen: boolean; 
     }
     // from/to derivam de view+anchor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, anchor, reload])
+  }, [view, anchor, reload, plan])
 
   // Quando a ligação à Google termina no browser, a app recebe remind://calendar/connected.
   useEffect(
@@ -191,7 +193,11 @@ export function CalendarView({ sidebarOpen, onExpand }: { sidebarOpen: boolean; 
               />
               <span className="dot" style={{ background: c.color ?? 'var(--accent)' }} />
               {c.name}
-              {c.locked && <span className="pro-badge">Pro</span>}
+              {c.locked && (
+                <button type="button" className="pro-badge pro-badge-btn" onClick={openPro} title={t('pro.upgrade')} data-testid="cal-go-pro">
+                  Pro
+                </button>
+              )}
             </label>
           ))}
         </div>
