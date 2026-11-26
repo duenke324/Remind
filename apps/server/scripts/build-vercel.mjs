@@ -79,11 +79,14 @@ writeFileSync(
       routes: [
         { src: '/(.*)', headers: securityHeaders, continue: true },
         { src: '^/admin(?:/.*)?$', headers: adminHeaders, continue: true },
+        { src: '^/pro(?:/obrigado)?/?$', headers: adminHeaders, continue: true },
         ...ADMIN_HOSTS.map((host) => ({ src: '^/(?!api/).*$', has: [{ type: 'host', value: host }], headers: adminHeaders, continue: true })),
         { handle: 'filesystem' },
         // Nos domínios do painel, tudo o que não é /api é o painel.
         ...ADMIN_HOSTS.map((host) => ({ src: '^/(?!api/)(?!admin/).*$', has: [{ type: 'host', value: host }], dest: '/admin/index.html' })),
         { src: '^/admin(?:/.*)?$', dest: '/admin/index.html' },
+        // Página de compra do Remind Pro (o passo /pro/entrar vai para o servidor).
+        { src: '^/pro(?:/obrigado)?/?$', dest: '/admin/pro.html' },
         { src: '/(.*)', dest: '/index' }
       ]
     },

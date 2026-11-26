@@ -9,6 +9,7 @@ export type Plan = 'free' | 'pro'
  * Planos e registo de ações de administração.
  * - entitlement: uma linha por conta Pro (origem manual ou stripe; sem `expires_at` = sem fim).
  * - admin_audit: cada ação de um admin sobre uma conta (quem, o quê, a quem, quando).
+ * - billing_customer: a ligação entre uma conta e o cliente correspondente na Stripe.
  */
 export const PLANS_SQL = `
     create table if not exists entitlement (
@@ -33,6 +34,11 @@ export const PLANS_SQL = `
     );
     create index if not exists admin_audit_target_idx on admin_audit (target_id, created_at desc);
     create index if not exists admin_audit_created_idx on admin_audit (created_at desc);
+    create table if not exists billing_customer (
+      user_id            text primary key references "user"(id) on delete cascade,
+      stripe_customer_id text not null unique,
+      created_at         timestamptz not null default now()
+    );
 `
 
 export async function migratePlans(pool: pg.Pool): Promise<void> {

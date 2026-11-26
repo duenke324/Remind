@@ -8,6 +8,7 @@ describe('pedidos permitidos ao servidor', () => {
     ['PUT', '/api/pages/abc-123'],
     ['DELETE', '/api/pages/abc_123'],
     ['GET', '/api/me'],
+    ['POST', '/api/billing/link'],
     ['GET', '/api/calendar/status'],
     ['GET', '/api/calendar/calendars'],
     ['POST', '/api/calendar/connect'],
@@ -23,6 +24,9 @@ describe('pedidos permitidos ao servidor', () => {
 
   it.each([
     ['POST', '/api/pages'],
+    ['POST', '/api/billing/checkout'],
+    ['POST', '/api/billing/portal'],
+    ['GET', '/api/billing/link'],
     ['GET', '/api/admin/users'],
     ['POST', '/api/auth/sign-out'],
     ['GET', '/api/pages/../admin'],

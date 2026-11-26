@@ -1,0 +1,146 @@
+.pro-page {
+  min-height: 100vh;
+  background: var(--bg-soft);
+}
+.pro-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+.pro-pill,
+.pro-save {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--pro);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pro-main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 16px 48px;
+}
+.pro-main h1 {
+  font-size: 30px;
+  line-height: 1.2;
+  margin: 16px 0 8px;
+}
+.pro-lead {
+  font-size: 16px;
+  margin: 0 0 24px;
+}
+.pro-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: grid;
+  gap: 10px;
+}
+.pro-benefits li {
+  display: grid;
+  gap: 2px;
+  padding-left: 28px;
+  position: relative;
+}
+.pro-benefits li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--pro) 16%, transparent);
+  color: var(--pro);
+}
+.pro-plans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.pro-plan {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 22px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.pro-plan h2 {
+  margin: 0;
+}
+.pro-plan .btn {
+  margin-top: 10px;
+  min-height: 40px;
+}
+.pro-plan-best {
+  border: 2px solid var(--pro);
+  box-shadow: var(--shadow);
+}
+.pro-save {
+  position: absolute;
+  top: -11px;
+  right: 16px;
+}
+.pro-price {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 4px 0 0;
+}
+.pro-price .muted {
+  font-size: 15px;
+  font-weight: 400;
+}
+.pro-notice {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.pro-active,
+.pro-thanks {
+  padding: 28px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  margin-top: 16px;
+}
+.pro-thanks h1,
+.pro-active h1 {
+  margin-top: 0;
+}
+.pro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.pro-thanks .btn,
+.pro-actions .btn {
+  min-height: 40px;
+  text-decoration: none;
+}
+.pro-account {
+  margin-top: 24px;
+}
+@media (max-width: 560px) {
+  .pro-plans {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .pro-main h1 {
+    font-size: 24px;
+  }
+}

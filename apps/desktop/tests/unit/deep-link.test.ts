@@ -13,6 +13,8 @@ describe('parseDeepLink', () => {
     expect(parseDeepLink('remind://page/9f1c2e')).toEqual({ kind: 'open-page', pageId: '9f1c2e' })
     expect(parseDeepLink('remind://calendar/connected')).toEqual({ kind: 'calendar-connected' })
     expect(parseDeepLink('remind://calendar/other')).toBeNull()
+    expect(parseDeepLink('remind://pro/ativado')).toEqual({ kind: 'pro-activated' })
+    expect(parseDeepLink('remind://pro/outra')).toBeNull()
   })
 
   it('rejeita outros protocolos', () => {

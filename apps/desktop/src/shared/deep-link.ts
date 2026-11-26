@@ -9,6 +9,7 @@ export type DeepLink =
   | { kind: 'auth-callback'; params: Record<string, string> }
   | { kind: 'open-page'; pageId: string }
   | { kind: 'calendar-connected' }
+  | { kind: 'pro-activated' }
 
 const PAGE_ID = /^[A-Za-z0-9_-]{1,64}$/
 
@@ -37,6 +38,7 @@ export function parseDeepLink(raw: string): DeepLink | null {
   }
 
   if (route === 'calendar/connected') return { kind: 'calendar-connected' }
+  if (route === 'pro/ativado') return { kind: 'pro-activated' }
 
   if (url.host === 'page') {
     const pageId = url.pathname.replace(/^\//, '')

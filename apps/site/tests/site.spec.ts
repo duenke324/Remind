@@ -74,4 +74,13 @@ test.describe('downloads', () => {
     await expect(page.locator('[data-os-hint]')).toContainText('Intel')
     await context.close()
   })
+
+  test('preços: grátis e Pro, e "Passar a Pro" leva à página de compra', async ({ page }) => {
+    await page.goto('/#precos')
+    const pro = page.locator('.price-card-pro')
+    await expect(pro).toContainText('2,99 €')
+    await expect(pro).toContainText('24 €/ano')
+    await expect(pro.locator('[data-buy-pro]')).toHaveAttribute('href', 'https://api.remind.uno/pro')
+    await expect(page.locator('nav a[href="#precos"]')).toHaveCount(1)
+  })
 })

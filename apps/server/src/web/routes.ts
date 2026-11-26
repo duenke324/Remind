@@ -130,6 +130,35 @@ ${error ? `<p class="error">${escapeHtml(error)}</p>` : ''}
     return redirect
   })
 
+  // A app abre /pro/entrar?token=… : o browser fica com a sessão da app e segue para a página do Pro.
+  app.get('/pro/entrar', async (c) => {
+    const token = c.req.query('token') ?? ''
+    const redirect = new Response(null, { status: 302, headers: { location: '/pro', 'cache-control': 'no-store' } })
+    if (!/^[A-Za-z0-9_-]{8,256}$/.test(token)) return redirect
+    try {
+      const { headers } = await auth.api.verifyOneTimeToken({ body: { token }, returnHeaders: true })
+      for (const cookie of headers.getSetCookie()) redirect.headers.append('set-cookie', cookie)
+    } catch {
+      // Link expirado: a página /pro pede para entrar.
+    }
+    return redirect
+  })
+
+  // "Sair" na página do Pro: esquece a sessão neste browser sem a terminar (pode ser a mesma da app).
+  app.post('/pro/sair', (c) => {
+    const res = c.json({ ok: true })
+    const names = (c.req.header('cookie') ?? '')
+      .split(';')
+      .map((p) => p.trim().split('=')[0] ?? '')
+      .filter((n) => /^(__Secure-)?better-auth\./.test(n))
+    for (const name of names) {
+      const secure = name.startsWith('__Secure-') ? '; Secure' : ''
+      res.headers.append('set-cookie', `${name}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${secure}`)
+    }
+    res.headers.set('cache-control', 'no-store')
+    return res
+  })
+
   app.get('/calendar/connected', (c) => {
     const link = 'remind://calendar/connected'
     return c.html(

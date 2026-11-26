@@ -13,6 +13,7 @@ import {
   SearchIcon,
   SidebarIcon,
   SignOutIcon,
+  SparkleIcon,
   StarIcon,
   TrashIcon
 } from '../ui/icons'
@@ -50,7 +51,7 @@ interface Props {
 
 export function Sidebar({ onSearch, onSettings, onTrash, onCollapse, onCalendar, calendarActive }: Props) {
   const { t } = useI18n()
-  const { user, pages, store, currentId, open, createPage } = useWorkspace()
+  const { user, pages, store, currentId, open, createPage, plan, openPro } = useWorkspace()
   const [expanded, setExpanded] = useState(loadExpanded)
   const [menu, setMenu] = useState<{ anchor: HTMLElement; items: MenuItem[] } | null>(null)
   const [drag, setDrag] = useState<{ id: string; target: string | null; position: DropPosition | null }>({ id: '', target: null, position: null })
@@ -234,6 +235,11 @@ export function Sidebar({ onSearch, onSettings, onTrash, onCollapse, onCalendar,
         <button className="nav-item" onClick={() => void createPage(null)} data-testid="new-page">
           <PlusIcon /> <span>{t('ws.newPage')}</span>
         </button>
+        {plan === 'free' && (
+          <button className="nav-item nav-pro" onClick={openPro} data-testid="open-pro">
+            <SparkleIcon /> <span>{t('pro.navItem')}</span>
+          </button>
+        )}
       </nav>
 
       <div className="sidebar-scroll">

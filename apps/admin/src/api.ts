@@ -64,6 +64,27 @@ export const auth = {
   me: () => call<{ admin: AdminInfo }>('/api/admin/me')
 }
 
+// ---------- Remind Pro (página /pro) ----------
+
+export interface BillingStatus {
+  email: string
+  plan: 'free' | 'pro'
+  source: 'manual' | 'stripe' | null
+  expiresAt: string | null
+  /** Os pagamentos estão configurados no servidor. */
+  available: boolean
+  /** Tem cliente na Stripe (pode abrir o portal). */
+  canManage: boolean
+}
+
+export const billing = {
+  status: () => call<BillingStatus>('/api/billing/status'),
+  checkout: (interval: 'month' | 'year') => call<{ url: string }>('/api/billing/checkout', { body: { interval } }),
+  portal: () => call<{ url: string }>('/api/billing/portal', { body: {} }),
+  /** Sai só neste browser (a sessão pode ser a mesma da app, que continua ligada). */
+  forget: () => call('/pro/sair', { body: {} })
+}
+
 // ---------- Painel ----------
 
 export interface Stats {

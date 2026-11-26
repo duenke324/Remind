@@ -67,3 +67,8 @@ export const SmileIcon = (p: IconProps) => (
 export const CalendarIcon = (p: IconProps) => (
   <Icon {...p}><rect x="3.5" y="4.5" width="13" height="12" rx="2" /><path d="M3.5 8.5h13M7 3v3M13 3v3" /></Icon>
 )
+export const SparkleIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z" />
+  </Icon>
+)

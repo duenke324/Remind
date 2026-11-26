@@ -14,6 +14,7 @@ const RULES: { methods: ApiMethod[]; path: RegExp }[] = [
   { methods: ['GET'], path: new RegExp(`^/api/pages(\\?since=\\d{1,19})?$`) },
   { methods: ['PUT', 'DELETE'], path: new RegExp(`^/api/pages/${ID}$`) },
   { methods: ['GET'], path: /^\/api\/me$/ },
+  { methods: ['POST'], path: /^\/api\/billing\/link$/ },
   { methods: ['GET'], path: /^\/api\/calendar\/(status|calendars)$/ },
   { methods: ['POST'], path: /^\/api\/calendar\/connect$/ },
   { methods: ['DELETE'], path: /^\/api\/calendar\/connection$/ },

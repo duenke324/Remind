@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { User } from '../../../shared/types'
+import { openProPage, usePlan } from '../data/plan'
 import { PageStore, useLive } from '../data/store'
 import { SyncEngine, type SyncStatus } from '../data/sync'
 import type { LocalPage } from '../data/sync-logic'
@@ -35,6 +36,17 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
   const [overlay, setOverlay] = useState<'search' | 'settings' | null>(null)
   const [section, setSection] = useState<'pages' | 'calendar'>('pages')
   const [trashAnchor, setTrashAnchor] = useState<HTMLElement | null>(null)
+  const { me } = usePlan()
+  const plan = me?.plan ?? null
+  const [proNotice, setProNotice] = useState<'error' | 'opened' | null>(null)
+  const openPro = useCallback(() => {
+    void openProPage().then((ok) => setProNotice(ok ? 'opened' : 'error'))
+  }, [])
+
+  // Pagamento concluído (remind://pro/ativado): o aviso some e as páginas presas pelo limite sincronizam.
+  useEffect(() => {
+    if (plan === 'pro') setProNotice(null)
+  }, [plan])
 
   useEffect(() => {
     sync.start()
@@ -96,7 +108,7 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
 
   const current = pages.find((p) => p.id === currentId) ?? null
 
-  const value: WorkspaceValue = { user, store, pages, loaded, currentId: current?.id ?? null, open, createPage, syncStatus, offline }
+  const value: WorkspaceValue = { user, store, pages, loaded, currentId: current?.id ?? null, open, createPage, syncStatus, offline, plan, openPro }
 
   return (
     <WorkspaceContext.Provider value={value}>
@@ -112,9 +124,20 @@ export function Workspace({ user, offline, version, serverUrl }: { user: User; o
           />
         )}
         <main className="main">
-          {overLimit > 0 && (
+          {overLimit > 0 && plan !== 'pro' && (
             <div className="limit-banner" role="status" data-testid="limit-banner">
-              {t('ws.limitBanner', { count: String(overLimit) })}
+              <span>{t('ws.limitBanner', { count: String(overLimit) })}</span>
+              <button className="btn btn-primary btn-sm" onClick={openPro} data-testid="limit-go-pro">
+                {t('pro.upgrade')}
+              </button>
+            </div>
+          )}
+          {proNotice && (
+            <div className={`pro-notice${proNotice === 'error' ? ' error' : ''}`} role="status" data-testid="pro-notice">
+              <span>{t(proNotice === 'error' ? 'pro.openError' : 'pro.opened')}</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setProNotice(null)} aria-label={t('ws.close')}>
+                ×
+              </button>
             </div>
           )}
           {section === 'calendar' ? (

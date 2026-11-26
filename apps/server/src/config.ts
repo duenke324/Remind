@@ -1,5 +1,6 @@
 import pg from 'pg'
 import { createAuth, type AuthConfig, type OAuthCredentials } from './auth'
+import { createStripe } from './billing/stripe'
 import { createMemoryMailer, createSmtpMailer, type Mailer } from './mailer'
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
@@ -45,6 +46,34 @@ export function adminEmails(env: NodeJS.ProcessEnv): string[] {
     .filter((e) => /^[^@\s]+@[^@\s]+$/.test(e))
 }
 
+/**
+ * Stripe (Remind Pro). Precisa das quatro variáveis; com alguma em falta, a compra fica indisponível
+ * (o resto do servidor funciona na mesma).
+ */
+export function stripeSettings(env: NodeJS.ProcessEnv) {
+  const names = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_MONTHLY', 'STRIPE_PRICE_YEARLY'] as const
+  const values = names.map((n) => env[n]?.trim() ?? '')
+  if (values.every((v) => !v)) return null
+  const missing = names.filter((_, i) => !values[i])
+  if (missing.length) {
+    console.error(`[stripe] pagamentos desligados: falta ${missing.join(', ')}`)
+    return null
+  }
+  const [secretKey, webhookSecret, monthly, yearly] = values as [string, string, string, string]
+  if (!/^(sk|rk)_(test|live)_/.test(secretKey)) throw new Error('STRIPE_SECRET_KEY não parece uma chave secreta da Stripe (começa por sk_test_ ou sk_live_)')
+  if (!webhookSecret.startsWith('whsec_')) throw new Error('STRIPE_WEBHOOK_SECRET não parece um segredo de webhook (começa por whsec_)')
+  if (!monthly.startsWith('price_') || !yearly.startsWith('price_')) {
+    throw new Error('STRIPE_PRICE_MONTHLY e STRIPE_PRICE_YEARLY têm de ser IDs de preço da Stripe (começam por price_)')
+  }
+  return {
+    secretKey,
+    webhookSecret,
+    prices: { month: monthly, year: yearly },
+    // Só em testes: uma "Stripe" local.
+    apiBase: env.NODE_ENV !== 'production' && env.STRIPE_API_URL ? env.STRIPE_API_URL : undefined
+  }
+}
+
 export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
   const pool = new pg.Pool({ connectionString: required(env, 'DATABASE_URL'), max: 3 })
   const mailer = mailerFromEnv(env)
@@ -64,8 +93,11 @@ export function fromEnv(env: NodeJS.ProcessEnv = process.env) {
       .map((o) => o.trim())
       .filter((o) => /^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(o))
   }
+  const stripe = stripeSettings(env)
   return {
     auth: createAuth(config),
+    stripe: stripe ? createStripe(stripe) : null,
+    stripeWebhookSecret: stripe?.webhookSecret ?? null,
     pool,
     baseURL: config.baseURL,
     mailer,
