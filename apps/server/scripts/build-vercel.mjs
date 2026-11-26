@@ -61,7 +61,8 @@ const securityHeaders = {
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains'
 }
 
-const ADMIN_HOST = 'admin.remind.uno'
+// Domínios onde a raiz é o painel de admin.
+const ADMIN_HOSTS = ['admin.remind.uno', 'admin-remind.pt']
 // O painel só carrega ficheiros próprios e só fala com a própria origem.
 const adminHeaders = {
   'Content-Security-Policy':
@@ -78,10 +79,10 @@ writeFileSync(
       routes: [
         { src: '/(.*)', headers: securityHeaders, continue: true },
         { src: '^/admin(?:/.*)?$', headers: adminHeaders, continue: true },
-        { src: '^/(?!api/).*$', has: [{ type: 'host', value: ADMIN_HOST }], headers: adminHeaders, continue: true },
+        ...ADMIN_HOSTS.map((host) => ({ src: '^/(?!api/).*$', has: [{ type: 'host', value: host }], headers: adminHeaders, continue: true })),
         { handle: 'filesystem' },
-        // admin.remind.uno: tudo o que não é /api é o painel.
-        { src: '^/(?!api/)(?!admin/).*$', has: [{ type: 'host', value: ADMIN_HOST }], dest: '/admin/index.html' },
+        // Nos domínios do painel, tudo o que não é /api é o painel.
+        ...ADMIN_HOSTS.map((host) => ({ src: '^/(?!api/)(?!admin/).*$', has: [{ type: 'host', value: host }], dest: '/admin/index.html' })),
         { src: '^/admin(?:/.*)?$', dest: '/admin/index.html' },
         { src: '/(.*)', dest: '/index' }
       ]
